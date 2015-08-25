@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.2)
+project("Camera Calibration")
+find_package( OpenCV REQUIRED )
+include_directories(include ${OpenCV_INCLUDE_DIRS} )
+file( GLOB SOURCES "src/*.cpp" example.cpp )
+add_executable( calib ${SOURCES} )
+target_link_libraries( calib ${OpenCV_LIBS} )
