@@ -11,6 +11,8 @@ enum class Pattern { CHESSBOARD };
 class CameraCalibrator{
 
 private:
+
+    enum Status {NOT_CALIBRATED, CALIBRATED };
     //for calibration
     //const unsigned int THRESHOLD_OF_POINTS;
     cv::Mat cameraMatrix;
@@ -22,6 +24,8 @@ private:
     vector<cv::Mat> translationVectors;
 
     double reprojectionError;
+    bool status;
+    bool sensorDimensionsAvaliable;
 
     //Configuration
     cv::Size boardSize;
@@ -29,6 +33,8 @@ private:
     vector<string> filelist;
     unsigned int source;
     unsigned int imageIndex;
+    double apertureWidth;
+    double apertureHeight;
 
     // temporary data?
     vector<cv::Point3f> corners;
@@ -51,8 +57,7 @@ public:
 
     double computeReprojectionError();
 
-    void displayIntrinsecParameters();
-
+    void displayResults();
 
 
 };

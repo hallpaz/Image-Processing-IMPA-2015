@@ -13,8 +13,10 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 
-using namespace cv;
+#include <json.hpp>
+
 using namespace std;
+using json = nlohmann::json;
 
 
 CameraCalibrator::CameraCalibrator(){
@@ -24,6 +26,12 @@ CameraCalibrator::CameraCalibrator(){
     squareSize = 50; //mm
     imageIndex = 0;
     source = 0;
+
+    status = NOT_CALIBRATED;
+    sensorDimensionsAvaliable = false;
+
+    apertureWidth = 1.0; //Should write default value
+    apertureHeight = 1.0;
 
     filelist.push_back("images/board0.jpg");
     filelist.push_back("images/board1.jpg");
@@ -129,25 +137,68 @@ bool CameraCalibrator::runCalibration(){
 }
 
 
-void CameraCalibrator::displayIntrinsecParameters(){
-    /*void cv::calibrationMatrixValues(InputArray  	cameraMatrix,
-		Size  	imageSize,
-		double  apertureWidth,
-		double  apertureHeight,
-		double &  	fovx,
-		double &  	fovy,
-		double &  	focalLength,
-		Point2d &  	principalPoint,
-		double &  	aspectRatio
-	) */
-}
 
-int main(){
+void CameraCalibrator::displayResults(){
+    double fovx, fovy, focalLength, aspectRatio;
+    Point2d principalPoint;
 
-    CameraCalibrator calibrador;
+    cv::calibrationMatrixValues(cameraMatrix,imageSize,
+	    apertureWidth, apertureHeight,
+		fovx, fovy, focalLength, principalPoint, aspectRatio);
 
-    calibrador.runCalibration();
+    stringstream intrinsicText;
+    if(sensorDimensionsAvaliable){
+        intrinsicText << "Sensor dimensions were given as input. Focal length will be measured in mm." << endl;
+    }else{
+        intrinsicText << "Sensor dimensions not available. Focal length value will be in pixels together with sensor information" << endl;
+    }
 
-    return 0;
+    json intrinsicParameters;
+    intrinsicParameters["Text"] = "Camera intrinsic Parameters: ";
+
+    intrinsicText << "Camera intrinsic Parameters: " << endl;
+    intrinsicText << "Focal Length: " << focalLength << endl;
+    intrinsicText << "Principal Point: " << endl;
+
+    intrinsicText << "Computed Parameters:" << endl;
+    intrinsicText << "fov X: " << fovx << endl;
+    intrinsicText << "fov Y: " << fovy << endl;
+    intrinsicText << "Aspect Ratio: " << aspectRatio << endl;
+
+
+    cout << intrinsicText.str();
+
+    cout << "Camera Extrinsic Parameters for each image: "  << endl;
+
+    vector<string>::iterator imageNameIterator;
+
+    for(int i = 0; i < filelist.size(); ++i){
+        stringstream extrinsicText;
+        intrinsicText << "Image Number: " << i << endl;
+
+        extrinsicText <<"Rodrigues Rotation Vector" << rotationVectors[i] << endl;
+        extrinsicText <<"Translation Vector" << translationVectors[i] << endl;
+
+        double meanError;
+        vector<cv::Point2f> reprojectedImageCorners;
+
+        projectPoints(worldPoints[i], rotationVectors[i], translationVectors[i], cameraMatrix, distortionCoefficients, reprojectedImageCorners);
+
+        meanError = norm(imagePoints[i], reprojectedImageCorners, NORM_L2);
+        meanError = meanError*meanError/reprojectedImageCorners.size();
+
+        extrinsicText << "Mean Square Error: " << meanError << endl;
+
+        cout << extrinsicText.str();
+
+        Mat currentImage = imread(filelist[i]);
+        stringstream filename;
+        filename << "reprojected/reprojected_" << i << ".jpg";
+
+        drawChessboardCorners(currentImage, boardSize, reprojectedImageCorners, true);
+        imwrite(filename.str(), currentImage);
+
+    }
+
 
 }
