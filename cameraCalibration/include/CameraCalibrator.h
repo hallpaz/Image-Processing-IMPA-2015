@@ -6,7 +6,6 @@
 using namespace std;
 
 enum class ImageSource { FILE, CAMERA  };
-enum class Pattern { CHESSBOARD };
 
 class CameraCalibrator{
 
@@ -14,7 +13,6 @@ private:
 
     enum Status {NOT_CALIBRATED, CALIBRATED };
     //for calibration
-    //const unsigned int THRESHOLD_OF_POINTS;
     cv::Mat cameraMatrix;
     cv::Mat distortionCoefficients;
 
@@ -26,41 +24,29 @@ private:
     double reprojectionError;
     bool status;
     bool sensorDimensionsAvaliable;
+    cv::Size imageSize;
 
     //Configuration
     cv::Size boardSize;
     float squareSize;
     vector<string> filelist;
-    unsigned int source;
-    unsigned int imageIndex;
     double apertureWidth;
     double apertureHeight;
 
-    // temporary data?
+    // temporary data
     vector<cv::Point3f> corners;
     vector<cv::Point2f> imageCorners;
-    cv::Size imageSize;
 
     void addInputPoints(vector<cv::Point3f> worldCorners, vector<cv::Point2f> imageCorners);
-
-    cv::Mat getNextImage();
+    void computeBoardCornersWorldPosition();
+    double computeReprojectionError();
 
 public:
 
     CameraCalibrator();
-
     bool runCalibration();
-
-    void computeBoardCornersWorldPosition();
-
-    void computeBoardCornersWorldPosition(cv::Size boardSize, float squareSize, std::vector<cv::Point3f>& corners);
-
-    double computeReprojectionError();
-
     void displayResults();
 
-
 };
-
 
 #endif

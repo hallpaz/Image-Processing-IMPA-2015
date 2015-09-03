@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <time.h>
-#include <stdio.h>
 
 #include <opencv2/core.hpp>
 #include <opencv2/core/utility.hpp>
@@ -14,45 +13,36 @@
 #include <opencv2/highgui.hpp>
 
 #include <json.hpp>
+#include <fstream>
 
 using namespace std;
+using namespace cv;
 using json = nlohmann::json;
 
 
 CameraCalibrator::CameraCalibrator(){
-
     // board data initialization
-    boardSize = cv::Size(9, 6);
-    squareSize = 50; //mm
-    imageIndex = 0;
-    source = 0;
-
     status = NOT_CALIBRATED;
-    sensorDimensionsAvaliable = false;
 
-    apertureWidth = 1.0; //Should write default value
-    apertureHeight = 1.0;
-
-    filelist.push_back("images/board0.jpg");
-    filelist.push_back("images/board1.jpg");
-    filelist.push_back("images/board2.jpg");
-    filelist.push_back("images/board3.jpg");
-    filelist.push_back("images/board4.jpg");
-    filelist.push_back("images/board5.jpg");
-    filelist.push_back("images/board6.jpg");
-    filelist.push_back("images/board7.jpg");
-    filelist.push_back("images/board8.jpg");
-
-}
-
-
-void CameraCalibrator::computeBoardCornersWorldPosition(cv::Size boardSize, float squareSize, std::vector<cv::Point3f>& corners){
-
-    for (size_t i = 0; i < boardSize.height; ++i) {
-        for (size_t j = 0; j < boardSize.width; ++j) {
-            corners.push_back(cv::Point3f(j*squareSize, i*squareSize, 0));
-        }
+    std::ifstream file("configuration.json");
+    std::string str;
+    std::string file_contents;
+    while (std::getline(file, str))
+    {
+      file_contents += str;
+      file_contents.push_back('\n');
     }
+    json js = json::parse(file_contents);
+
+    for (json::iterator it = js["images"].begin(); it != js["images"].end(); ++it) {
+        filelist.push_back(*it);
+    }
+
+    boardSize = cv::Size(js["board width"], js["board height"]);
+    squareSize = js["square size"]; //should be in mm
+    sensorDimensionsAvaliable = js["sensor dimensions available"];
+    apertureWidth = js["aperture width"]; //Should write default value
+    apertureHeight = js["aperture height"];
 }
 
 void CameraCalibrator::addInputPoints(vector<cv::Point3f> worldCorners, vector<cv::Point2f> imageCorners){
@@ -71,134 +61,119 @@ void CameraCalibrator::computeBoardCornersWorldPosition(){
     }
 }
 
-cv::Mat CameraCalibrator::getNextImage(){
-    switch (source) {
-        case 0:
-        if(imageIndex < filelist.size()){
-            cout << imageIndex << endl;
-            return cv::imread(filelist[imageIndex++]);
-        }
-
-        else{
-            Mat doido;
-            return doido;
-        }
-        case 1:
-            //dosomething
-            Mat fromCamera;
-            return fromCamera;
-    }
-}
-
 bool CameraCalibrator::runCalibration(){
 
     computeBoardCornersWorldPosition();
     bool hasFoundCorners = false;
-    cv::Mat currentImage = getNextImage();
+    cv::Mat currentImage;
 
+    for (size_t i = 0; i < filelist.size(); i++) {
 
-    namedWindow("DisplayImage", WINDOW_AUTOSIZE);
-    imshow("Display Image", currentImage);
-    waitKey(10000);
-
-    while( (imagePoints.size() < 9) && imageIndex<=filelist.size()){
-
+        currentImage = imread(filelist[i]);
         hasFoundCorners = cv::findChessboardCorners(currentImage, boardSize, imageCorners);
-
         // If we detected all inner points correctly
         if(imageCorners.size() == boardSize.area()){
-
             //refine to subpixel position
             cv::Mat grayImage;
             cv::cvtColor(currentImage, grayImage, COLOR_BGR2GRAY);
             cv::cornerSubPix(grayImage, imageCorners, cv::Size(11,11), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::COUNT, 30, 0.1));
 
-            //Draw image with identified corners
-            cv::drawChessboardCorners(currentImage, boardSize, imageCorners, hasFoundCorners);
-            imwrite("marked.png", currentImage);
-
             addInputPoints(corners, imageCorners);
         }
-        cout << "Image Points Size " << imagePoints.size() << endl;
-        currentImage = getNextImage();
+        //cout << "Image Points Size " << imagePoints.size() << endl;
     }
+    imageSize = currentImage.size();
 
-    //Display Image
-    /*namedWindow("DisplayImage", WINDOW_AUTOSIZE);
-    imshow("Display Image", image);
-    waitKey(0);*/
-    currentImage = imread(filelist[0]);
     //Execute calibration
     double reprojectionError =
-                cv::calibrateCamera(worldPoints, imagePoints, currentImage.size(),
+                cv::calibrateCamera(worldPoints, imagePoints, imageSize,
                     cameraMatrix, distortionCoefficients,
                     rotationVectors, translationVectors);
     cout << "Reprojection error: " << reprojectionError << endl;
-}
 
+    status = CALIBRATED;
+}
 
 
 void CameraCalibrator::displayResults(){
     double fovx, fovy, focalLength, aspectRatio;
     Point2d principalPoint;
 
-    cv::calibrationMatrixValues(cameraMatrix,imageSize,
-	    apertureWidth, apertureHeight,
-		fovx, fovy, focalLength, principalPoint, aspectRatio);
-
-    stringstream intrinsicText;
-    if(sensorDimensionsAvaliable){
-        intrinsicText << "Sensor dimensions were given as input. Focal length will be measured in mm." << endl;
-    }else{
-        intrinsicText << "Sensor dimensions not available. Focal length value will be in pixels together with sensor information" << endl;
+    if(status == NOT_CALIBRATED){
+        cout << "NOT CALIBRATED YET, MONSTER!!!!" << endl;
+        return;
     }
 
+    cv::calibrationMatrixValues(cameraMatrix,imageSize, apertureWidth, apertureHeight,
+	                           fovx, fovy, focalLength, principalPoint, aspectRatio);
+
     json intrinsicParameters;
-    intrinsicParameters["Text"] = "Camera intrinsic Parameters: ";
+    stringstream auxstream;
+    ofstream myfilestream;
 
-    intrinsicText << "Camera intrinsic Parameters: " << endl;
-    intrinsicText << "Focal Length: " << focalLength << endl;
-    intrinsicText << "Principal Point: " << endl;
+    intrinsicParameters["Text"] = "Camera intrinsic Parameters";
+    if(sensorDimensionsAvaliable){
+        intrinsicParameters["Disclaimer"] = "Sensor dimensions were given as input. Focal length will be measured in mm.";
+    }else{
+        intrinsicParameters["Disclaimer"] = "Sensor dimensions not available. Focal length value will be in pixels together with sensor information";
+    }
 
-    intrinsicText << "Computed Parameters:" << endl;
-    intrinsicText << "fov X: " << fovx << endl;
-    intrinsicText << "fov Y: " << fovy << endl;
-    intrinsicText << "Aspect Ratio: " << aspectRatio << endl;
+    intrinsicParameters["focalLength"] = focalLength;
 
+    auxstream << principalPoint;
+    intrinsicParameters["Principal Point"] = auxstream.str();
+    auxstream.str("");
 
-    cout << intrinsicText.str();
+    intrinsicParameters["Computed Parameters"]["fov X"] = fovx;
+    intrinsicParameters["Computed Parameters"]["fov Y"] = fovy;
+    intrinsicParameters["Computed Parameters"]["Aspect Ratio"] =  aspectRatio;
 
-    cout << "Camera Extrinsic Parameters for each image: "  << endl;
+    cout << "Camera intrinsic Parameters are available at parameters/intrinsic.json"  << endl;
+    myfilestream.open("parameters/intrinsic.json");
+    myfilestream << intrinsicParameters.dump(4);
+    myfilestream.close();
+
+    cout << "Camera Extrinsic Parameters for each image are available at parameters/extrinsic_IMAGE-NUMBER.json"  << endl;
+    cout << "Images with projected points plotted are available at reprojected/reprojected_IMAGE-NUMBER.json"  << endl;
 
     vector<string>::iterator imageNameIterator;
 
     for(int i = 0; i < filelist.size(); ++i){
-        stringstream extrinsicText;
-        intrinsicText << "Image Number: " << i << endl;
+        json extrinsicParameters;
 
-        extrinsicText <<"Rodrigues Rotation Vector" << rotationVectors[i] << endl;
-        extrinsicText <<"Translation Vector" << translationVectors[i] << endl;
+        extrinsicParameters["Image Number"] = i;
+        auxstream << rotationVectors[i];
+        extrinsicParameters["Rodrigues Rotation Vector"] = auxstream.str();
+        auxstream.str("");
+
+        auxstream << translationVectors[i];
+        extrinsicParameters["Translation Vector"] = auxstream.str();
+        auxstream.str("");
 
         double meanError;
         vector<cv::Point2f> reprojectedImageCorners;
 
-        projectPoints(worldPoints[i], rotationVectors[i], translationVectors[i], cameraMatrix, distortionCoefficients, reprojectedImageCorners);
+        cv::projectPoints(worldPoints[i], rotationVectors[i], translationVectors[i], cameraMatrix, distortionCoefficients, reprojectedImageCorners);
 
-        meanError = norm(imagePoints[i], reprojectedImageCorners, NORM_L2);
+        meanError = cv::norm(imagePoints[i], reprojectedImageCorners, NORM_L2);
         meanError = meanError*meanError/reprojectedImageCorners.size();
 
-        extrinsicText << "Mean Square Error: " << meanError << endl;
+        extrinsicParameters["Mean Square Error"] = meanError;
 
-        cout << extrinsicText.str();
-
-        Mat currentImage = imread(filelist[i]);
+        //cout << extrinsicParameters.dump(4);
         stringstream filename;
+        filename << "parameters/extrinsic_" << i << ".json";
+
+        myfilestream.open(filename.str(), ofstream::out);
+        myfilestream << extrinsicParameters.dump(4);
+        myfilestream.close();
+        filename.str("");
+
+        Mat currentImage = cv::imread(filelist[i]);
         filename << "reprojected/reprojected_" << i << ".jpg";
-
-        drawChessboardCorners(currentImage, boardSize, reprojectedImageCorners, true);
-        imwrite(filename.str(), currentImage);
-
+        cv::drawChessboardCorners(currentImage, boardSize, reprojectedImageCorners, true);
+        cv::imwrite(filename.str(), currentImage);
     }
-
+    cout << "DONE. Check the files, please" << endl;
 
 }
