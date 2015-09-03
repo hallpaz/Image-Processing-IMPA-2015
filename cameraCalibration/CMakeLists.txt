@@ -20,6 +20,7 @@ file( GLOB SOURCES "src/*.cpp")
 file(MAKE_DIRECTORY "build/images")
 file(MAKE_DIRECTORY "build/reprojected")
 file(MAKE_DIRECTORY "build/parameters")
+file(COPY "example/configuration.json" DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable( calib ${SOURCES} )
 target_link_libraries( calib ${OpenCV_LIBS} )

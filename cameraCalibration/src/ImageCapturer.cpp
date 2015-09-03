@@ -1,6 +1,7 @@
 #include <ImageCapturer.h>
 
 #include <sstream>
+#include <time.h>
 #include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/utility.hpp>
@@ -12,8 +13,7 @@ ImageCapturer::ImageCapturer(double nrFrames, string _sequenceName, unsigned int
     cameraID = _cameraID;
 
 }
-
-void ImageCapturer::takeShot(){
+ImageCapturer::~ImageCapturer(){
 
 }
 
@@ -24,19 +24,14 @@ void ImageCapturer::beginCapture(){
         cout << "Problem with main camera! Aborting!!!" << endl;
         return;
     }
-    /*string msg =  "Press 'g' to start";
-    int baseLine = 0;
-    Size textSize = getTextSize(msg, 1, 1, 1, &baseLine);
-    Point textOrigin(view.cols - 2*textSize.width - 10, view.rows - 2*baseLine - 10);
-    putText( view, msg, textOrigin, 1, 1);*/
 
     cout << "Insert an amount of time (seconds) for delay between consecutive shots\n" << endl;
     cin >> delay;
-    //delay = delay;
+
     cv::Mat currentImage;
     for (size_t i = 0; i < numberOfFrames; i++) {
         cout << "Image number " << i << endl;
-        //cv::waitKey(delay);
+
         stringstream filename;
         clock_t start_time = time(NULL);
         while(time(NULL) - start_time < delay){
@@ -47,8 +42,10 @@ void ImageCapturer::beginCapture(){
         cv::imwrite(filename.str(), currentImage);
 
         bitwise_not(currentImage, currentImage);
-        cv::imshow("Image Captured", currentImage);
+        start_time = clock();
+        while( (clock() - start_time) < 500){
+            cv::imshow("Image Captured", currentImage);
+        }
     }
-    camera.close();
 
 }

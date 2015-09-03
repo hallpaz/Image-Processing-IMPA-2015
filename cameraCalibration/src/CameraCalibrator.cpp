@@ -41,8 +41,8 @@ CameraCalibrator::CameraCalibrator(){
     boardSize = cv::Size(js["board width"], js["board height"]);
     squareSize = js["square size"]; //should be in mm
     sensorDimensionsAvaliable = js["sensor dimensions available"];
-    apertureWidth = js["aperture width"]; //Should write default value
-    apertureHeight = js["aperture height"];
+    apertureWidth = js["aperture width"]; //only really useful if
+    apertureHeight = js["aperture height"]; // sensor Dimensions are available
 }
 
 void CameraCalibrator::addInputPoints(vector<cv::Point3f> worldCorners, vector<cv::Point2f> imageCorners){
@@ -50,7 +50,6 @@ void CameraCalibrator::addInputPoints(vector<cv::Point3f> worldCorners, vector<c
     worldPoints.push_back(worldCorners);
     //2D image points
     imagePoints.push_back(imageCorners);
-
 }
 
 void CameraCalibrator::computeBoardCornersWorldPosition(){
@@ -67,9 +66,14 @@ bool CameraCalibrator::runCalibration(){
     bool hasFoundCorners = false;
     cv::Mat currentImage;
 
-    for (size_t i = 0; i < filelist.size(); i++) {
 
+    for (size_t i = 0; i < filelist.size(); i++) {
+        cout << "Reading images " << filelist[i] << endl;
         currentImage = imread(filelist[i]);
+        if(currentImage.data == NULL){
+            cout << "Problems while reading the image: " << filelist[i] << " Won't continue reading!!!\n" << endl;
+            break;
+        }
         hasFoundCorners = cv::findChessboardCorners(currentImage, boardSize, imageCorners);
         // If we detected all inner points correctly
         if(imageCorners.size() == boardSize.area()){
@@ -79,19 +83,23 @@ bool CameraCalibrator::runCalibration(){
             cv::cornerSubPix(grayImage, imageCorners, cv::Size(11,11), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::COUNT, 30, 0.1));
 
             addInputPoints(corners, imageCorners);
-        }
-        //cout << "Image Points Size " << imagePoints.size() << endl;
-    }
-    imageSize = currentImage.size();
 
+            successulImages.push_back(filelist[i]);
+            success.push_back(i);
+        }
+    }
+    imageSize = imread(filelist[0]).size();
+
+    cout << "Calibrating Camera..." << endl;
     //Execute calibration
     double reprojectionError =
                 cv::calibrateCamera(worldPoints, imagePoints, imageSize,
                     cameraMatrix, distortionCoefficients,
                     rotationVectors, translationVectors);
-    cout << "Reprojection error: " << reprojectionError << endl;
+    cout << "Global Reprojection error: " << reprojectionError << endl;
 
     status = CALIBRATED;
+    return true;
 }
 
 
@@ -136,9 +144,14 @@ void CameraCalibrator::displayResults(){
     cout << "Camera Extrinsic Parameters for each image are available at parameters/extrinsic_IMAGE-NUMBER.json"  << endl;
     cout << "Images with projected points plotted are available at reprojected/reprojected_IMAGE-NUMBER.json"  << endl;
 
-    vector<string>::iterator imageNameIterator;
+    for(int i = 0; i < successulImages.size(); ++i){
+        cv::Mat currentImage = cv::imread(successulImages[i]);
+        cout << success[i] << endl;
+        if(currentImage.data == NULL){
+            cout << "DEBUG DEBUG" << endl;
+            break;
+        }
 
-    for(int i = 0; i < filelist.size(); ++i){
         json extrinsicParameters;
 
         extrinsicParameters["Image Number"] = i;
@@ -162,15 +175,15 @@ void CameraCalibrator::displayResults(){
 
         //cout << extrinsicParameters.dump(4);
         stringstream filename;
-        filename << "parameters/extrinsic_" << i << ".json";
+        filename << "parameters/extrinsic_" << success[i] << ".json";
 
         myfilestream.open(filename.str(), ofstream::out);
         myfilestream << extrinsicParameters.dump(4);
         myfilestream.close();
         filename.str("");
 
-        Mat currentImage = cv::imread(filelist[i]);
-        filename << "reprojected/reprojected_" << i << ".jpg";
+
+        filename << "reprojected/reprojected_" << success[i] << ".jpg";
         cv::drawChessboardCorners(currentImage, boardSize, reprojectedImageCorners, true);
         cv::imwrite(filename.str(), currentImage);
     }

@@ -25,6 +25,8 @@ private:
     bool status;
     bool sensorDimensionsAvaliable;
     cv::Size imageSize;
+    vector<int> success;
+    vector<string> successulImages;
 
     //Configuration
     cv::Size boardSize;

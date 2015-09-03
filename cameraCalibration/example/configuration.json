@@ -1,0 +1,24 @@
+{
+
+    "board width": 9,
+    "board height": 6,
+    "square size": 50,
+    "sensor dimensions available": false,
+    "aperture width": 1,
+    "aperture height": 1,
+    "images": [ "images/board0.jpg",
+                "images/board1.jpg",
+                "images/board2.jpg",
+                "images/board3.jpg",
+                "images/board4.jpg",
+                "images/board5.jpg",
+                "images/board6.jpg",
+                "images/board7.jpg",
+                "images/board8.jpg",
+                "images/board9.jpg",
+                "images/board10.jpg",
+                "images/board11.jpg",
+                "images/board12.jpg",
+                "images/board13.jpg",
+                "images/board14.jpg" ]
+}
