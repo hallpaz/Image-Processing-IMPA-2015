@@ -17,6 +17,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QRadioButton>
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
@@ -41,6 +42,12 @@ public:
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_2;
     QLabel *imageLabel;
+    QWidget *widget;
+    QRadioButton *scale_0;
+    QRadioButton *scale_1;
+    QRadioButton *scale_2;
+    QRadioButton *scale_3;
+    QLabel *label;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -50,6 +57,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->resize(847, 667);
+        MainWindow->setMinimumSize(QSize(0, 0));
         actionLoadImage = new QAction(MainWindow);
         actionLoadImage->setObjectName(QStringLiteral("actionLoadImage"));
         QIcon icon;
@@ -100,7 +108,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 827, 560));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 827, 534));
         verticalLayout_2 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -113,6 +121,32 @@ public:
         scrollArea->setWidget(scrollAreaWidgetContents);
 
         verticalLayout->addWidget(scrollArea);
+
+        widget = new QWidget(centralWidget);
+        widget->setObjectName(QStringLiteral("widget"));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(widget->sizePolicy().hasHeightForWidth());
+        widget->setSizePolicy(sizePolicy);
+        widget->setMinimumSize(QSize(829, 20));
+        scale_0 = new QRadioButton(widget);
+        scale_0->setObjectName(QStringLiteral("scale_0"));
+        scale_0->setGeometry(QRect(150, 0, 51, 22));
+        scale_1 = new QRadioButton(widget);
+        scale_1->setObjectName(QStringLiteral("scale_1"));
+        scale_1->setGeometry(QRect(200, 0, 41, 22));
+        scale_2 = new QRadioButton(widget);
+        scale_2->setObjectName(QStringLiteral("scale_2"));
+        scale_2->setGeometry(QRect(240, 0, 41, 22));
+        scale_3 = new QRadioButton(widget);
+        scale_3->setObjectName(QStringLiteral("scale_3"));
+        scale_3->setGeometry(QRect(280, 0, 41, 22));
+        label = new QLabel(widget);
+        label->setObjectName(QStringLiteral("label"));
+        label->setGeometry(QRect(20, 0, 121, 17));
+
+        verticalLayout->addWidget(widget);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
@@ -140,7 +174,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Image Pyramids", 0));
         actionLoadImage->setText(QApplication::translate("MainWindow", "LoadImage", 0));
 #ifndef QT_NO_TOOLTIP
         actionLoadImage->setToolTip(QApplication::translate("MainWindow", "Load an image from file", 0));
@@ -174,6 +208,11 @@ public:
         actionGradientMagnitude->setToolTip(QApplication::translate("MainWindow", "Gradient Magnitude", 0));
 #endif // QT_NO_TOOLTIP
         imageLabel->setText(QString());
+        scale_0->setText(QApplication::translate("MainWindow", "0", 0));
+        scale_1->setText(QApplication::translate("MainWindow", "1", 0));
+        scale_2->setText(QApplication::translate("MainWindow", "2", 0));
+        scale_3->setText(QApplication::translate("MainWindow", "3", 0));
+        label->setText(QApplication::translate("MainWindow", "Current Scale", 0));
     } // retranslateUi
 
 };

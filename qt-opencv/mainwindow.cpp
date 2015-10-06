@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    current_scale = 0;
 
     //m_timer.start(20);
     //connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
@@ -24,7 +25,7 @@ MainWindow::~MainWindow()
 cv::Mat MainWindow::applyFilter( cv::Mat &cvImage )
 {
     //NOTE: Example using blur filtering
-    cv::Mat dst = m_cvImage.clone();
+    cv::Mat dst = currentImage.clone();
 #if 1
     const int maxKernelLength = 31;
     for( int i=1; i < maxKernelLength; i += 2 )
@@ -45,7 +46,7 @@ void MainWindow::captureAndShowVideoFrame()
 
     cv::Mat frame;
     m_cvCamera >> frame;
-    m_cvImage = frame.clone();
+    currentImage = frame.clone();
 
     if( ui->actionProcessing->isChecked() )
         frame = applyFilter( frame );
@@ -68,12 +69,12 @@ void MainWindow::on_actionLoadImage_triggered()
     if( filename.isEmpty() )
         return;
 
-    m_cvImage = cv::imread( filename.toStdString().c_str(), CV_LOAD_IMAGE_COLOR );
-    if( ! m_cvImage.data )
+    currentImage = cv::imread( filename.toStdString().c_str(), CV_LOAD_IMAGE_COLOR );
+    if( ! currentImage.data )
         return;
 
-    cv::Mat cvRGBImage( m_cvImage.rows, m_cvImage.cols, m_cvImage.type() );
-    cv::cvtColor( m_cvImage, cvRGBImage, CV_BGR2RGB );
+    cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
+    cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
 
     QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
     if( image.isNull() )
@@ -87,7 +88,7 @@ void MainWindow::on_actionLoadImage_triggered()
 void MainWindow::on_actionSaveImage_triggered()
 {
 
-    if( ! m_cvImage.data )
+    if( ! currentImage.data )
         return;
 
     QString filename = QFileDialog::getSaveFileName(this, "Save image");
@@ -105,12 +106,12 @@ void MainWindow::on_actionSaveImage_triggered()
 
 void MainWindow::on_actionProcessing_triggered()
 {
-    if( ! m_cvImage.data || ui->actionCameraCapture->isChecked() )
+    if( ! currentImage.data || ui->actionCameraCapture->isChecked() )
         return;
 
-    cv::Mat dst = m_cvImage.clone();
+    cv::Mat dst = currentImage.clone();
     if( ui->actionProcessing->isChecked() )
-        dst = applyFilter( m_cvImage );
+        dst = applyFilter( currentImage );
     cv::cvtColor( dst, dst, CV_BGR2RGB );
 
     QImage image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_RGB888 );
@@ -121,11 +122,11 @@ void MainWindow::on_actionProcessing_triggered()
 
 void MainWindow::on_actionReset_triggered()
 {
-    if( ! m_cvImage.data )
+    if( ! currentImage.data )
         return;
 
-    cv::Mat cvRGBImage( m_cvImage.rows, m_cvImage.cols, m_cvImage.type() );
-    cv::cvtColor( m_cvImage, cvRGBImage, CV_BGR2RGB );
+    cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
+    cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
 
     QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
     if( image.isNull() )
@@ -164,4 +165,50 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
         this->on_actionProcessing_triggered();
 
     }
+}
+
+void MainWindow::on_actionPyramid_triggered()
+{
+    if( ! currentImage.data || ui->actionCameraCapture->isChecked() )
+        return;
+
+    cv::Mat dst = currentImage.clone();
+    scaleProcesseur.load(currentImage, 4);
+
+    setDisplayImage(scaleProcesseur[current_scale]);
+}
+
+void MainWindow::setDisplayImage(cv::Mat& dst){
+    QImage image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_RGB888 );
+    QPixmap pixmap = QPixmap::fromImage( image );
+    ui->imageLabel->setPixmap( pixmap );
+}
+
+
+void MainWindow::on_actionGradientMagnitude_toggled(bool toggle)
+{
+    cv::Mat dst;
+    scaleProcesseur.gradientMagnitudeMap(dst, current_scale);
+    setDisplayImage(dst);
+
+}
+
+void MainWindow::on_scale_0_toggled(bool checked)
+{
+    current_scale = 0;
+}
+
+void MainWindow::on_scale_1_toggled(bool checked)
+{
+    current_scale = 1;
+}
+
+void MainWindow::on_scale_2_toggled(bool checked)
+{
+    current_scale = 2;
+}
+
+void MainWindow::on_scale_3_toggled(bool checked)
+{
+    current_scale = 3;
 }

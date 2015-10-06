@@ -1,7 +1,15 @@
 #include "scalespacecomputer.h"
 
+#include <iostream>
+
 ScaleSpaceComputer::ScaleSpaceComputer(Mat& srcImg, int numberOfScales)
 {
+    load(srcImg, numberOfScales);
+}
+
+ScaleSpaceComputer::ScaleSpaceComputer(){}
+
+void ScaleSpaceComputer::load(Mat &srcImg, int numberOfScales){
     Mat srcGrayImg;
     if(srcImg.channels() == 3){
         cv::cvtColor(srcImg, srcGrayImg, CV_BGR2GRAY);
@@ -9,6 +17,7 @@ ScaleSpaceComputer::ScaleSpaceComputer(Mat& srcImg, int numberOfScales)
         srcGrayImg = srcImg;
     }
     imagesAtScale.push_back(srcGrayImg);
+
     for(int i = 1; i < numberOfScales; ++i){
         Mat img;
         descendToScale(srcGrayImg, img, i);
@@ -19,8 +28,14 @@ ScaleSpaceComputer::ScaleSpaceComputer(Mat& srcImg, int numberOfScales)
 bool ScaleSpaceComputer::descendToScale(Mat& srcImg, Mat& dstImg, int scaleFactor){
     if(scaleFactor < 1)
         return false;
-    int divideFactor = 2 << (scaleFactor-1);
-    cv::pyrDown(srcImg, dstImg, cv::Size(srcImg.rows/divideFactor, srcImg.cols/divideFactor));
+
+    int divideFactor = (2 << (scaleFactor-1) );
+
+    std::cout << srcImg.rows << " x " << srcImg.cols <<" factor: " << divideFactor << std::endl;
+
+    cv::pyrDown(srcImg, dstImg);// cv::Size(srcImg.rows/divideFactor, srcImg.cols/divideFactor));
+
+    std::cout << "hop" << std::endl;
 
     return true;
 }
@@ -54,4 +69,9 @@ bool ScaleSpaceComputer::gradientOrientationMap(Mat& dstImg, int scaleFactor){
     verticalGradient(srcImg, gradY);
     cv::phase(gradX, gradY, dstImg);
     return true;
+}
+
+
+cv::Mat& ScaleSpaceComputer::operator [](int index){
+    return imagesAtScale[index];
 }
