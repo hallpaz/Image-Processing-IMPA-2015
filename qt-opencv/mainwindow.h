@@ -63,6 +63,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     int current_scale;
+    bool shouldRescale;
 };
 
 #endif // MAINWINDOW_H

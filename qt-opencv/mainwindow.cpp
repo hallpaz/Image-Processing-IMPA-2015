@@ -270,6 +270,7 @@ void MainWindow::updateDisplay(){
     }else{
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_RGB888 );
     }
+    image = image.scaledToHeight(originalImage.rows);
     QPixmap pixmap = QPixmap::fromImage( image );
     ui->imageLabel->setPixmap( pixmap );
 }

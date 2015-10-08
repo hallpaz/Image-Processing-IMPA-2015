@@ -48,23 +48,25 @@ bool ScaleSpaceComputer::descendToScale(Mat& srcImg, Mat& dstImg, int scaleFacto
 }
 
 bool ScaleSpaceComputer::horizontalGradient(Mat& srcImg, Mat& dstImg){
-    cv::Sobel(srcImg, dstImg, CV_32F, 1, 0, 3);
+    cv::Sobel(srcImg, dstImg, CV_32FC1, 1, 0, 3);
     return true;
 }
 
 bool ScaleSpaceComputer::verticalGradient(Mat& srcImg, Mat& dstImg){
-    cv::Sobel(srcImg, dstImg, CV_32F, 0, 1, 3);
+    cv::Sobel(srcImg, dstImg, CV_32FC1, 0, 1, 3);
     return true;
 }
 
 bool ScaleSpaceComputer::gradientMagnitudeMap(Mat& dstImg, int scaleFactor){
     Mat gradX, gradY;
-    Mat srcImg = imagesAtScale[scaleFactor].clone();
+    Mat srcImg = (imagesAtScale[scaleFactor]).clone();
 
+
+    //horizontalGradient(srcImg, dstImg);
     horizontalGradient(srcImg, gradX);
     verticalGradient(srcImg, gradY);
-    cv::magnitude(gradX, gradY, dstImg);
-    cv::normalize(dstImg, dstImg, 0, 255, cv::NORM_L2, CV_8UC1);
+    cv::magnitude(gradX, gradY, srcImg);
+    cv::normalize(srcImg, dstImg, 0, 255, cv::NORM_MINMAX, CV_8UC1);
 
     return true;
 }
