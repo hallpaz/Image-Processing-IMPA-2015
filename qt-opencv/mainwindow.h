@@ -19,15 +19,18 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void setDisplayImage(cv::Mat& dst);
+    void updateDisplay();
 
 protected:
     cv::Mat applyFilter( cv::Mat &cvImage );
     
 protected:
-    cv::Mat currentImage;
+    cv::Mat currentImage, originalImage;
     cv::VideoCapture m_cvCamera;
     ScaleSpaceComputer scaleProcesseur;
     QTimer m_timer;
+    bool shouldDisplayGradientMap;
+    bool shouldDisplayGradientOrientation;
 
 protected slots:
     void captureAndShowVideoFrame();
@@ -45,8 +48,6 @@ private slots:
 
     void on_actionCameraCapture_toggled(bool toggle);
 
-    void on_actionPyramid_triggered();
-
     void on_actionGradientMagnitude_toggled(bool arg1);
 
     void on_scale_0_toggled(bool checked);
@@ -56,6 +57,8 @@ private slots:
     void on_scale_2_toggled(bool checked);
 
     void on_scale_3_toggled(bool checked);
+
+    void on_actionPyramid_toggled(bool toggle);
 
 private:
     Ui::MainWindow *ui;

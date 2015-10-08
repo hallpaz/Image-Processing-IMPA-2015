@@ -12,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     current_scale = 0;
+    shouldDisplayGradientMap = false;
+    shouldDisplayGradientOrientation = false;
 
     //m_timer.start(20);
     //connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
@@ -73,6 +75,7 @@ void MainWindow::on_actionLoadImage_triggered()
     if( ! currentImage.data )
         return;
 
+    originalImage = currentImage.clone();
     cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
     cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
 
@@ -167,19 +170,29 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
     }
 }
 
-void MainWindow::on_actionPyramid_triggered()
+void MainWindow::on_actionPyramid_toggled(bool toggled)
 {
     if( ! currentImage.data || ui->actionCameraCapture->isChecked() )
         return;
+    if(toggled){
 
-    cv::Mat dst = currentImage.clone();
-    scaleProcesseur.load(currentImage, 4);
-
-    setDisplayImage(scaleProcesseur[current_scale]);
+        scaleProcesseur.load(currentImage, 4);
+        currentImage = scaleProcesseur[current_scale];
+        std::cout << "Pyramid toggled on" << std::endl;
+    }
+    else{
+        currentImage = originalImage;
+    }
+    updateDisplay();
 }
 
 void MainWindow::setDisplayImage(cv::Mat& dst){
-    QImage image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_RGB888 );
+    QImage image;
+    if(dst.channels() == 1){
+        image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_Grayscale8 );
+    }else{
+        image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_RGB888 );
+    }
     QPixmap pixmap = QPixmap::fromImage( image );
     ui->imageLabel->setPixmap( pixmap );
 }
@@ -187,28 +200,76 @@ void MainWindow::setDisplayImage(cv::Mat& dst){
 
 void MainWindow::on_actionGradientMagnitude_toggled(bool toggle)
 {
-    cv::Mat dst;
-    scaleProcesseur.gradientMagnitudeMap(dst, current_scale);
-    setDisplayImage(dst);
-
+    if(toggle){
+        if(shouldDisplayGradientOrientation)
+           std::cout << "shouldDisplayGradientOrientation activated too" << std::endl;
+    }
+    shouldDisplayGradientMap = toggle;
+    updateDisplay();
 }
 
 void MainWindow::on_scale_0_toggled(bool checked)
 {
-    current_scale = 0;
+    if(checked){
+        current_scale = 0;
+        std::cout << "current scale: " << current_scale << std::endl;
+        if(scaleProcesseur.ready()){
+            currentImage = scaleProcesseur[current_scale];
+            updateDisplay();
+        }
+    }
 }
 
 void MainWindow::on_scale_1_toggled(bool checked)
 {
-    current_scale = 1;
+    if(checked){
+        current_scale = 1;
+        std::cout << "current scale: " << current_scale << std::endl;
+        if(scaleProcesseur.ready()){
+            currentImage = scaleProcesseur[current_scale];
+            updateDisplay();
+        }
+    }
+
 }
 
 void MainWindow::on_scale_2_toggled(bool checked)
 {
-    current_scale = 2;
+    if(checked){
+        current_scale = 2;
+        std::cout << "current scale: " << current_scale << std::endl;
+        if(scaleProcesseur.ready()){
+            currentImage = scaleProcesseur[current_scale];
+            updateDisplay();
+        }
+    }
 }
 
 void MainWindow::on_scale_3_toggled(bool checked)
 {
-    current_scale = 3;
+    if(checked){
+        current_scale = 3;
+        std::cout << "current scale: " << current_scale << std::endl;
+        if(scaleProcesseur.ready()){
+            currentImage = scaleProcesseur[current_scale];
+            updateDisplay();
+        }
+    }
+}
+
+void MainWindow::updateDisplay(){
+    QImage image;
+    if(currentImage.channels() == 1){
+        if(shouldDisplayGradientMap){
+            scaleProcesseur.gradientMagnitudeMap(currentImage, current_scale);
+        }
+        if(shouldDisplayGradientOrientation){
+            scaleProcesseur.gradientOrientationMap(currentImage, current_scale);
+        }
+        image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_Grayscale8 );
+    }else{
+        image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_RGB888 );
+    }
+    QPixmap pixmap = QPixmap::fromImage( image );
+    ui->imageLabel->setPixmap( pixmap );
 }

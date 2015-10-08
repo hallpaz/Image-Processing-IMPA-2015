@@ -7,9 +7,13 @@ ScaleSpaceComputer::ScaleSpaceComputer(Mat& srcImg, int numberOfScales)
     load(srcImg, numberOfScales);
 }
 
-ScaleSpaceComputer::ScaleSpaceComputer(){}
+ScaleSpaceComputer::ScaleSpaceComputer(){
+    pyramid_loaded = false;
+}
 
 void ScaleSpaceComputer::load(Mat &srcImg, int numberOfScales){
+    if(pyramid_loaded)
+        return;
     Mat srcGrayImg;
     if(srcImg.channels() == 3){
         cv::cvtColor(srcImg, srcGrayImg, CV_BGR2GRAY);
@@ -17,12 +21,15 @@ void ScaleSpaceComputer::load(Mat &srcImg, int numberOfScales){
         srcGrayImg = srcImg;
     }
     imagesAtScale.push_back(srcGrayImg);
-
+    srcImg = srcGrayImg;
     for(int i = 1; i < numberOfScales; ++i){
         Mat img;
-        descendToScale(srcGrayImg, img, i);
+        //descendToScale(srcGrayImg, img, i);
+        cv::pyrDown(srcImg, img, Size( srcImg.cols/2, srcImg.rows/2 ));
         imagesAtScale.push_back(img);
+        srcImg = img;
     }
+    pyramid_loaded = true;
 }
 
 bool ScaleSpaceComputer::descendToScale(Mat& srcImg, Mat& dstImg, int scaleFactor){
@@ -57,7 +64,8 @@ bool ScaleSpaceComputer::gradientMagnitudeMap(Mat& dstImg, int scaleFactor){
     horizontalGradient(srcImg, gradX);
     verticalGradient(srcImg, gradY);
     cv::magnitude(gradX, gradY, dstImg);
-    cv::normalize(dstImg, dstImg, 0, 255, CV_8UC1);
+    cv::normalize(dstImg, dstImg, 0, 255, cv::NORM_L2, CV_8UC1);
+
     return true;
 }
 
@@ -72,6 +80,10 @@ bool ScaleSpaceComputer::gradientOrientationMap(Mat& dstImg, int scaleFactor){
 }
 
 
-cv::Mat& ScaleSpaceComputer::operator [](int index){
+const cv::Mat& ScaleSpaceComputer::operator [](std::size_t index) const{
     return imagesAtScale[index];
+}
+
+bool ScaleSpaceComputer::ready(){
+    return pyramid_loaded;
 }
