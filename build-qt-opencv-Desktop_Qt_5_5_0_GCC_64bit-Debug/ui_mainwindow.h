@@ -30,7 +30,7 @@ class Ui_MainWindow
 {
 public:
     QAction *actionLoadImage;
-    QAction *actionProcessing;
+    QAction *actionGradientOrientation;
     QAction *actionSaveImage;
     QAction *actionReset;
     QAction *actionCameraCapture;
@@ -63,12 +63,12 @@ public:
         QIcon icon;
         icon.addFile(QStringLiteral(":/icons/open.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionLoadImage->setIcon(icon);
-        actionProcessing = new QAction(MainWindow);
-        actionProcessing->setObjectName(QStringLiteral("actionProcessing"));
-        actionProcessing->setCheckable(true);
+        actionGradientOrientation = new QAction(MainWindow);
+        actionGradientOrientation->setObjectName(QStringLiteral("actionGradientOrientation"));
+        actionGradientOrientation->setCheckable(true);
         QIcon icon1;
         icon1.addFile(QStringLiteral(":/icons/process.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionProcessing->setIcon(icon1);
+        actionGradientOrientation->setIcon(icon1);
         actionSaveImage = new QAction(MainWindow);
         actionSaveImage->setObjectName(QStringLiteral("actionSaveImage"));
         QIcon icon2;
@@ -162,8 +162,8 @@ public:
 
         mainToolBar->addAction(actionCameraCapture);
         mainToolBar->addAction(actionPyramid);
-        mainToolBar->addAction(actionProcessing);
         mainToolBar->addAction(actionGradientMagnitude);
+        mainToolBar->addAction(actionGradientOrientation);
         mainToolBar->addAction(actionLoadImage);
         mainToolBar->addAction(actionSaveImage);
 
@@ -180,11 +180,11 @@ public:
         actionLoadImage->setToolTip(QApplication::translate("MainWindow", "Load an image from file", 0));
 #endif // QT_NO_TOOLTIP
         actionLoadImage->setShortcut(QApplication::translate("MainWindow", "Ctrl+O", 0));
-        actionProcessing->setText(QApplication::translate("MainWindow", "Processing", 0));
+        actionGradientOrientation->setText(QApplication::translate("MainWindow", "Processing", 0));
 #ifndef QT_NO_TOOLTIP
-        actionProcessing->setToolTip(QApplication::translate("MainWindow", "Apply a filter on image", 0));
+        actionGradientOrientation->setToolTip(QApplication::translate("MainWindow", "Gradient Orientation", 0));
 #endif // QT_NO_TOOLTIP
-        actionProcessing->setShortcut(QApplication::translate("MainWindow", "Ctrl+P", 0));
+        actionGradientOrientation->setShortcut(QApplication::translate("MainWindow", "Ctrl+P", 0));
         actionSaveImage->setText(QApplication::translate("MainWindow", "SaveImage", 0));
 #ifndef QT_NO_TOOLTIP
         actionSaveImage->setToolTip(QApplication::translate("MainWindow", "Save the image", 0));

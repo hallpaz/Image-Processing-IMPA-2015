@@ -18,13 +18,19 @@ public:
     bool gradientOrientationMap(Mat& dstImg, int scaleFactor);
     const cv::Mat& operator[](std::size_t index) const;
     bool ready();
+    void computeAllMagnitude();
+    const cv::Mat& getMagMap(std::size_t index);
 
 private:
     bool pyramid_loaded;
+    int numberOfScales;
     vector<Mat> imagesAtScale;
+    vector<Mat> magnitudeAtScale;
+    vector<Mat> orientationAtScale;
     bool descendToScale(Mat& srcImg, Mat& dstImg, int scaleFactor);
     bool horizontalGradient(Mat& srcImg, Mat& dstImg);
     bool verticalGradient(Mat& srcImg, Mat& dstImg);
+    void inline drawArrows(Mat& angleImg, Mat& dstImg, int scaleFactor);
 };
 
 #endif // SCALESPACECOMPUTER_H

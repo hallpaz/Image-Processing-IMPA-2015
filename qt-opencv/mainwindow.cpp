@@ -50,9 +50,6 @@ void MainWindow::captureAndShowVideoFrame()
     m_cvCamera >> frame;
     currentImage = frame.clone();
 
-    if( ui->actionProcessing->isChecked() )
-        frame = applyFilter( frame );
-
     cv::Mat cvRGBImage( frame.rows, frame.cols, frame.type() );
     cv::cvtColor( frame, cvRGBImage, CV_BGR2RGB );
 
@@ -76,8 +73,12 @@ void MainWindow::on_actionLoadImage_triggered()
         return;
 
     originalImage = currentImage.clone();
+    cv::cvtColor( originalImage, originalImage, CV_BGR2RGB );
+
     cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
     cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
+
+    currentImage = originalImage;
 
     QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
     if( image.isNull() )
@@ -113,8 +114,6 @@ void MainWindow::on_actionProcessing_triggered()
         return;
 
     cv::Mat dst = currentImage.clone();
-    if( ui->actionProcessing->isChecked() )
-        dst = applyFilter( currentImage );
     cv::cvtColor( dst, dst, CV_BGR2RGB );
 
     QImage image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_RGB888 );
@@ -201,10 +200,18 @@ void MainWindow::setDisplayImage(cv::Mat& dst){
 void MainWindow::on_actionGradientMagnitude_toggled(bool toggle)
 {
     if(toggle){
-        if(shouldDisplayGradientOrientation)
-           std::cout << "shouldDisplayGradientOrientation activated too" << std::endl;
+        if(shouldDisplayGradientOrientation){
+            ui->actionGradientOrientation->toggle();
+            std::cout << "shouldDisplayGradientOrientation activated too" << std::endl;
+        }
+
+    }else{
+        if(scaleProcesseur.ready()){
+            currentImage = (scaleProcesseur[current_scale]).clone();
+        }
     }
     shouldDisplayGradientMap = toggle;
+    cout << shouldDisplayGradientMap << endl;
     updateDisplay();
 }
 
@@ -215,6 +222,7 @@ void MainWindow::on_scale_0_toggled(bool checked)
         std::cout << "current scale: " << current_scale << std::endl;
         if(scaleProcesseur.ready()){
             currentImage = scaleProcesseur[current_scale];
+            currentImage = currentImage.clone();
             updateDisplay();
         }
     }
@@ -227,6 +235,7 @@ void MainWindow::on_scale_1_toggled(bool checked)
         std::cout << "current scale: " << current_scale << std::endl;
         if(scaleProcesseur.ready()){
             currentImage = scaleProcesseur[current_scale];
+            currentImage = currentImage.clone();
             updateDisplay();
         }
     }
@@ -240,6 +249,7 @@ void MainWindow::on_scale_2_toggled(bool checked)
         std::cout << "current scale: " << current_scale << std::endl;
         if(scaleProcesseur.ready()){
             currentImage = scaleProcesseur[current_scale];
+            currentImage = currentImage.clone();
             updateDisplay();
         }
     }
@@ -252,6 +262,7 @@ void MainWindow::on_scale_3_toggled(bool checked)
         std::cout << "current scale: " << current_scale << std::endl;
         if(scaleProcesseur.ready()){
             currentImage = scaleProcesseur[current_scale];
+            currentImage = currentImage.clone();
             updateDisplay();
         }
     }
@@ -261,7 +272,8 @@ void MainWindow::updateDisplay(){
     QImage image;
     if(currentImage.channels() == 1){
         if(shouldDisplayGradientMap){
-            scaleProcesseur.gradientMagnitudeMap(currentImage, current_scale);
+            //scaleProcesseur.gradientMagnitudeMap(currentImage, current_scale);
+            currentImage = scaleProcesseur.getMagMap(current_scale);
         }
         if(shouldDisplayGradientOrientation){
             scaleProcesseur.gradientOrientationMap(currentImage, current_scale);
@@ -270,7 +282,25 @@ void MainWindow::updateDisplay(){
     }else{
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_RGB888 );
     }
-    image = image.scaledToHeight(originalImage.rows);
+    image = image.scaledToHeight(originalImage.rows, Qt::SmoothTransformation);
     QPixmap pixmap = QPixmap::fromImage( image );
     ui->imageLabel->setPixmap( pixmap );
+}
+
+void MainWindow::on_actionGradientOrientation_toggled(bool toggle)
+{
+    if(toggle){
+        if(shouldDisplayGradientMap){
+            std::cout << "shouldDisplayGradientMap activated too" << std::endl;
+            ui->actionGradientMagnitude->toggle();
+        }
+
+    }else{
+        if(scaleProcesseur.ready()){
+            currentImage = (scaleProcesseur[current_scale]).clone();
+        }
+    }
+    shouldDisplayGradientOrientation = toggle;
+    cout << shouldDisplayGradientOrientation << endl;
+    updateDisplay();
 }

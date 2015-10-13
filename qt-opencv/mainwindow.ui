@@ -149,8 +149,8 @@
    </attribute>
    <addaction name="actionCameraCapture"/>
    <addaction name="actionPyramid"/>
-   <addaction name="actionProcessing"/>
    <addaction name="actionGradientMagnitude"/>
+   <addaction name="actionGradientOrientation"/>
    <addaction name="actionLoadImage"/>
    <addaction name="actionSaveImage"/>
   </widget>
@@ -170,7 +170,7 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionProcessing">
+  <action name="actionGradientOrientation">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -182,7 +182,7 @@
     <string>Processing</string>
    </property>
    <property name="toolTip">
-    <string>Apply a filter on image</string>
+    <string>Gradient Orientation</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>

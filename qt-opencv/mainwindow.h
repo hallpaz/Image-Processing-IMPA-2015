@@ -60,6 +60,8 @@ private slots:
 
     void on_actionPyramid_toggled(bool toggle);
 
+    void on_actionGradientOrientation_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
     int current_scale;

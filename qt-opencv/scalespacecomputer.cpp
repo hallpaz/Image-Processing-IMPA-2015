@@ -1,6 +1,7 @@
 #include "scalespacecomputer.h"
 
 #include <iostream>
+#include <cmath>
 
 ScaleSpaceComputer::ScaleSpaceComputer(Mat& srcImg, int numberOfScales)
 {
@@ -14,6 +15,7 @@ ScaleSpaceComputer::ScaleSpaceComputer(){
 void ScaleSpaceComputer::load(Mat &srcImg, int numberOfScales){
     if(pyramid_loaded)
         return;
+    this->numberOfScales = numberOfScales;
     Mat srcGrayImg;
     if(srcImg.channels() == 3){
         cv::cvtColor(srcImg, srcGrayImg, CV_BGR2GRAY);
@@ -27,9 +29,18 @@ void ScaleSpaceComputer::load(Mat &srcImg, int numberOfScales){
         //descendToScale(srcGrayImg, img, i);
         cv::pyrDown(srcImg, img, Size( srcImg.cols/2, srcImg.rows/2 ));
         imagesAtScale.push_back(img);
+
         srcImg = img;
     }
     pyramid_loaded = true;
+}
+
+void ScaleSpaceComputer::computeAllMagnitude(){
+    for(int i = 0; i < numberOfScales; ++i){
+        Mat mag;
+        gradientMagnitudeMap(mag, i);
+        magnitudeAtScale.push_back(mag);
+    }
 }
 
 bool ScaleSpaceComputer::descendToScale(Mat& srcImg, Mat& dstImg, int scaleFactor){
@@ -74,13 +85,13 @@ bool ScaleSpaceComputer::gradientMagnitudeMap(Mat& dstImg, int scaleFactor){
 bool ScaleSpaceComputer::gradientOrientationMap(Mat& dstImg, int scaleFactor){
     Mat gradX, gradY;
     Mat srcImg = imagesAtScale[scaleFactor].clone();
-
+    Mat angleImg;
     horizontalGradient(srcImg, gradX);
     verticalGradient(srcImg, gradY);
-    cv::phase(gradX, gradY, dstImg);
+    cv::phase(gradX, gradY, angleImg, false);
+    drawArrows(angleImg, dstImg, scaleFactor);
     return true;
 }
-
 
 const cv::Mat& ScaleSpaceComputer::operator [](std::size_t index) const{
     return imagesAtScale[index];
@@ -88,4 +99,41 @@ const cv::Mat& ScaleSpaceComputer::operator [](std::size_t index) const{
 
 bool ScaleSpaceComputer::ready(){
     return pyramid_loaded;
+}
+
+const Mat& ScaleSpaceComputer::getMagMap(size_t index){
+    if(magnitudeAtScale.empty()){
+        computeAllMagnitude();
+    }
+    return magnitudeAtScale[index];
+}
+
+void ScaleSpaceComputer::drawArrows(Mat& angleImg, Mat& dstImg,int scaleFactor){
+    /*cv::arrowedLine( 	dstImg
+            Point  	pt1,
+            Point  	pt2,
+            const Scalar &  	color,
+            int  	thickness = 1,
+            int  	line_type = 8,
+            int  	shift = 0,
+            double  	tipLength = 0.1
+        );*/
+    unsigned int magnitudeThreshold = 64;
+    Mat srcImg = getMagMap(scaleFactor).clone();
+
+    dstImg.setTo(0);                          // clear image - set to black
+    int arrowLength = 3;
+    for(int i=0; i<srcImg.rows; i++){
+        for(int j=0; j<srcImg.cols; j++){
+            if(srcImg.at<uchar>(j,i) > magnitudeThreshold){
+                float angle = angleImg.at<float>(j, i);
+                Point start = Point(j, i);
+                Point direction = cv::Point(arrowLength * cos(angle), arrowLength * sin(angle));
+                cv::arrowedLine(dstImg, start, start + direction, cv::Scalar(255));
+
+            }
+        }
+    }
+
+
 }
