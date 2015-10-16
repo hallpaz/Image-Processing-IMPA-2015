@@ -19,6 +19,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QScrollArea>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
@@ -30,7 +31,7 @@ class Ui_MainWindow
 {
 public:
     QAction *actionLoadImage;
-    QAction *actionProcessing;
+    QAction *actionGradientOrientation;
     QAction *actionSaveImage;
     QAction *actionReset;
     QAction *actionCameraCapture;
@@ -48,6 +49,10 @@ public:
     QRadioButton *scale_2;
     QRadioButton *scale_3;
     QLabel *label;
+    QWidget *threshold_area;
+    QLabel *mag_label;
+    QSlider *thresholdSlider;
+    QLabel *thresholdValue;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -56,19 +61,19 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(847, 667);
+        MainWindow->resize(1024, 738);
         MainWindow->setMinimumSize(QSize(0, 0));
         actionLoadImage = new QAction(MainWindow);
         actionLoadImage->setObjectName(QStringLiteral("actionLoadImage"));
         QIcon icon;
         icon.addFile(QStringLiteral(":/icons/open.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionLoadImage->setIcon(icon);
-        actionProcessing = new QAction(MainWindow);
-        actionProcessing->setObjectName(QStringLiteral("actionProcessing"));
-        actionProcessing->setCheckable(true);
+        actionGradientOrientation = new QAction(MainWindow);
+        actionGradientOrientation->setObjectName(QStringLiteral("actionGradientOrientation"));
+        actionGradientOrientation->setCheckable(true);
         QIcon icon1;
-        icon1.addFile(QStringLiteral(":/icons/process.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionProcessing->setIcon(icon1);
+        icon1.addFile(QStringLiteral(":/icons/orientation.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionGradientOrientation->setIcon(icon1);
         actionSaveImage = new QAction(MainWindow);
         actionSaveImage->setObjectName(QStringLiteral("actionSaveImage"));
         QIcon icon2;
@@ -108,7 +113,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 827, 534));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 998, 560));
         verticalLayout_2 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -148,10 +153,27 @@ public:
 
         verticalLayout->addWidget(widget);
 
+        threshold_area = new QWidget(centralWidget);
+        threshold_area->setObjectName(QStringLiteral("threshold_area"));
+        threshold_area->setMinimumSize(QSize(0, 25));
+        mag_label = new QLabel(threshold_area);
+        mag_label->setObjectName(QStringLiteral("mag_label"));
+        mag_label->setGeometry(QRect(10, 0, 191, 16));
+        thresholdSlider = new QSlider(threshold_area);
+        thresholdSlider->setObjectName(QStringLiteral("thresholdSlider"));
+        thresholdSlider->setGeometry(QRect(280, 0, 701, 22));
+        thresholdSlider->setMaximum(255);
+        thresholdSlider->setOrientation(Qt::Horizontal);
+        thresholdValue = new QLabel(threshold_area);
+        thresholdValue->setObjectName(QStringLiteral("thresholdValue"));
+        thresholdValue->setGeometry(QRect(220, 0, 41, 16));
+
+        verticalLayout->addWidget(threshold_area);
+
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 847, 25));
+        menuBar->setGeometry(QRect(0, 0, 1024, 22));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -162,8 +184,8 @@ public:
 
         mainToolBar->addAction(actionCameraCapture);
         mainToolBar->addAction(actionPyramid);
-        mainToolBar->addAction(actionProcessing);
         mainToolBar->addAction(actionGradientMagnitude);
+        mainToolBar->addAction(actionGradientOrientation);
         mainToolBar->addAction(actionLoadImage);
         mainToolBar->addAction(actionSaveImage);
 
@@ -180,11 +202,11 @@ public:
         actionLoadImage->setToolTip(QApplication::translate("MainWindow", "Load an image from file", 0));
 #endif // QT_NO_TOOLTIP
         actionLoadImage->setShortcut(QApplication::translate("MainWindow", "Ctrl+O", 0));
-        actionProcessing->setText(QApplication::translate("MainWindow", "Processing", 0));
+        actionGradientOrientation->setText(QApplication::translate("MainWindow", "Processing", 0));
 #ifndef QT_NO_TOOLTIP
-        actionProcessing->setToolTip(QApplication::translate("MainWindow", "Apply a filter on image", 0));
+        actionGradientOrientation->setToolTip(QApplication::translate("MainWindow", "Gradient Orientation", 0));
 #endif // QT_NO_TOOLTIP
-        actionProcessing->setShortcut(QApplication::translate("MainWindow", "Ctrl+P", 0));
+        actionGradientOrientation->setShortcut(QApplication::translate("MainWindow", "Ctrl+P", 0));
         actionSaveImage->setText(QApplication::translate("MainWindow", "SaveImage", 0));
 #ifndef QT_NO_TOOLTIP
         actionSaveImage->setToolTip(QApplication::translate("MainWindow", "Save the image", 0));
@@ -213,6 +235,8 @@ public:
         scale_2->setText(QApplication::translate("MainWindow", "2", 0));
         scale_3->setText(QApplication::translate("MainWindow", "3", 0));
         label->setText(QApplication::translate("MainWindow", "Current Scale", 0));
+        mag_label->setText(QApplication::translate("MainWindow", "Gradient Magnitude Threshold", 0));
+        thresholdValue->setText(QApplication::translate("MainWindow", "0", 0));
     } // retranslateUi
 
 };

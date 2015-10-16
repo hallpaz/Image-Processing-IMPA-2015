@@ -70,8 +70,8 @@ bool ScaleSpaceComputer::verticalGradient(Mat& srcImg, Mat& dstImg){
 
 bool ScaleSpaceComputer::gradientMagnitudeMap(Mat& dstImg, int scaleFactor){
     Mat gradX, gradY;
-    Mat srcImg = (imagesAtScale[scaleFactor]).clone();
-
+    Mat srcImg = imagesAtScale[scaleFactor];
+    srcImg = srcImg.clone();
 
     //horizontalGradient(srcImg, dstImg);
     horizontalGradient(srcImg, gradX);
@@ -82,14 +82,15 @@ bool ScaleSpaceComputer::gradientMagnitudeMap(Mat& dstImg, int scaleFactor){
     return true;
 }
 
-bool ScaleSpaceComputer::gradientOrientationMap(Mat& dstImg, int scaleFactor){
+bool ScaleSpaceComputer::gradientOrientationMap(Mat& dstImg, int scaleFactor, int magnitudeThreshold){
     Mat gradX, gradY;
-    Mat srcImg = imagesAtScale[scaleFactor].clone();
+    Mat srcImg = imagesAtScale[scaleFactor];
+    srcImg = srcImg.clone();
     Mat angleImg;
     horizontalGradient(srcImg, gradX);
     verticalGradient(srcImg, gradY);
     cv::phase(gradX, gradY, angleImg, false);
-    drawArrows(angleImg, dstImg, scaleFactor);
+    drawArrows(angleImg, dstImg, scaleFactor, magnitudeThreshold);
     return true;
 }
 
@@ -108,32 +109,29 @@ const Mat& ScaleSpaceComputer::getMagMap(size_t index){
     return magnitudeAtScale[index];
 }
 
-void ScaleSpaceComputer::drawArrows(Mat& angleImg, Mat& dstImg,int scaleFactor){
-    /*cv::arrowedLine( 	dstImg
-            Point  	pt1,
-            Point  	pt2,
-            const Scalar &  	color,
-            int  	thickness = 1,
-            int  	line_type = 8,
-            int  	shift = 0,
-            double  	tipLength = 0.1
-        );*/
-    unsigned int magnitudeThreshold = 64;
+void ScaleSpaceComputer::drawArrows(Mat& angleImg, Mat& dstImg,int scaleFactor, int magnitudeThreshold){
+
     Mat srcImg = getMagMap(scaleFactor).clone();
 
     dstImg.setTo(0);                          // clear image - set to black
-    int arrowLength = 3;
+    float arrowLength = 0.3;
     for(int i=0; i<srcImg.rows; i++){
         for(int j=0; j<srcImg.cols; j++){
-            if(srcImg.at<uchar>(j,i) > magnitudeThreshold){
-                float angle = angleImg.at<float>(j, i);
+            uchar magValue = srcImg.at<uchar>(i,j);
+            if(magValue > magnitudeThreshold){
+                float angle = angleImg.at<float>(i, j);
                 Point start = Point(j, i);
-                Point direction = cv::Point(arrowLength * cos(angle), arrowLength * sin(angle));
-                cv::arrowedLine(dstImg, start, start + direction, cv::Scalar(255));
+                Point direction = cv::Point(magValue*arrowLength * cos(angle), magValue*arrowLength * sin(angle));
+                cv::arrowedLine(dstImg, start, start + direction, cv::Scalar(magValue));
 
             }
         }
     }
+}
 
-
+void ScaleSpaceComputer::clear(){
+    imagesAtScale.clear();
+    magnitudeAtScale.clear();
+    orientationAtScale.clear();
+    pyramid_loaded = false;
 }

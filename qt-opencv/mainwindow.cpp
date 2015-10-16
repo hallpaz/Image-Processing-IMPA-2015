@@ -6,6 +6,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <string>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -14,9 +16,10 @@ MainWindow::MainWindow(QWidget *parent) :
     current_scale = 0;
     shouldDisplayGradientMap = false;
     shouldDisplayGradientOrientation = false;
+    magnitudeThreshold = 0;
 
-    //m_timer.start(20);
-    //connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
+    m_timer.start(20);
+    connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
 }
 
 MainWindow::~MainWindow()
@@ -46,6 +49,10 @@ void MainWindow::captureAndShowVideoFrame()
     if( ! m_cvCamera.isOpened() )
         return;
 
+    if(scaleProcesseur.ready()){
+        scaleProcesseur.clear();
+    }
+
     cv::Mat frame;
     m_cvCamera >> frame;
     currentImage = frame.clone();
@@ -53,12 +60,9 @@ void MainWindow::captureAndShowVideoFrame()
     cv::Mat cvRGBImage( frame.rows, frame.cols, frame.type() );
     cv::cvtColor( frame, cvRGBImage, CV_BGR2RGB );
 
-    QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
-    if( image.isNull() )
-        return;
-
-    QPixmap pixmap = QPixmap::fromImage( image );
-    ui->imageLabel->setPixmap( pixmap );
+    originalImage = cvRGBImage.clone();
+    currentImage = originalImage;
+    updateDisplay();
 
 }
 
@@ -80,13 +84,21 @@ void MainWindow::on_actionLoadImage_triggered()
 
     currentImage = originalImage;
 
+    if(scaleProcesseur.ready()){
+        scaleProcesseur.clear();
+    }
+    if(shouldDisplayGradientMap)
+        ui->actionGradientMagnitude->toggle();
+    if(shouldDisplayGradientOrientation)
+        ui->actionGradientOrientation->toggle();
+
+
     QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
     if( image.isNull() )
         return;
 
     QPixmap pixmap = QPixmap::fromImage( image );
     ui->imageLabel->setPixmap( pixmap );
-
 }
 
 void MainWindow::on_actionSaveImage_triggered()
@@ -108,26 +120,13 @@ void MainWindow::on_actionSaveImage_triggered()
 
 }
 
-void MainWindow::on_actionProcessing_triggered()
-{
-    if( ! currentImage.data || ui->actionCameraCapture->isChecked() )
-        return;
-
-    cv::Mat dst = currentImage.clone();
-    cv::cvtColor( dst, dst, CV_BGR2RGB );
-
-    QImage image = QImage( (uchar*)dst.data, dst.cols, dst.rows, dst.step, QImage::Format_RGB888 );
-    QPixmap pixmap = QPixmap::fromImage( image );
-    ui->imageLabel->setPixmap( pixmap );
-
-}
-
 void MainWindow::on_actionReset_triggered()
 {
     if( ! currentImage.data )
         return;
 
     cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
+    cout << "convert 4" << endl;
     cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
 
     QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
@@ -164,7 +163,6 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
         ui->actionLoadImage->setDisabled( false );
         ui->actionSaveImage->setDisabled( false );
         ui->actionReset->setDisabled( false );
-        this->on_actionProcessing_triggered();
 
     }
 }
@@ -176,7 +174,7 @@ void MainWindow::on_actionPyramid_toggled(bool toggled)
     if(toggled){
 
         scaleProcesseur.load(currentImage, 4);
-        currentImage = scaleProcesseur[current_scale];
+        currentImage = scaleProcesseur[current_scale].clone();
         std::cout << "Pyramid toggled on" << std::endl;
     }
     else{
@@ -276,13 +274,13 @@ void MainWindow::updateDisplay(){
             currentImage = scaleProcesseur.getMagMap(current_scale);
         }
         if(shouldDisplayGradientOrientation){
-            scaleProcesseur.gradientOrientationMap(currentImage, current_scale);
+            scaleProcesseur.gradientOrientationMap(currentImage, current_scale, magnitudeThreshold);
         }
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_Grayscale8 );
     }else{
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_RGB888 );
     }
-    image = image.scaledToHeight(originalImage.rows, Qt::SmoothTransformation);
+    image = image.scaledToHeight(originalImage.rows);//, Qt::SmoothTransformation);
     QPixmap pixmap = QPixmap::fromImage( image );
     ui->imageLabel->setPixmap( pixmap );
 }
@@ -297,10 +295,20 @@ void MainWindow::on_actionGradientOrientation_toggled(bool toggle)
 
     }else{
         if(scaleProcesseur.ready()){
-            currentImage = (scaleProcesseur[current_scale]).clone();
+            currentImage = scaleProcesseur[current_scale];
+            currentImage = currentImage.clone();
         }
     }
     shouldDisplayGradientOrientation = toggle;
     cout << shouldDisplayGradientOrientation << endl;
+    updateDisplay();
+
+}
+
+void MainWindow::on_thresholdSlider_sliderMoved(int position)
+{
+    QString labelValue = QString::number(position);
+    ui->thresholdValue->setText(labelValue);
+    magnitudeThreshold = position;
     updateDisplay();
 }

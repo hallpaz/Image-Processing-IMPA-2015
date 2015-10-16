@@ -40,8 +40,6 @@ private slots:
 
     void on_actionSaveImage_triggered();
 
-    void on_actionProcessing_triggered();
-
     void on_actionReset_triggered();
 
     void on_actionCameraCapture_triggered();
@@ -62,10 +60,13 @@ private slots:
 
     void on_actionGradientOrientation_toggled(bool arg1);
 
+    void on_thresholdSlider_sliderMoved(int position);
+
 private:
     Ui::MainWindow *ui;
     int current_scale;
     bool shouldRescale;
+    int magnitudeThreshold;
 };
 
 #endif // MAINWINDOW_H

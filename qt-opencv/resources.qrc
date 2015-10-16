@@ -7,5 +7,6 @@
         <file>icons/save.png</file>
         <file>icons/pyramid.png</file>
         <file>icons/grad.png</file>
+        <file>icons/orientation.png</file>
     </qresource>
 </RCC>

@@ -174,6 +174,7 @@ DIST          = /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/spe
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/qt_config.prf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/macx-clang/qmake.conf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/spec_post.prf \
+		../qt-opencv/.qmake.stash \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/exclusive_builds.prf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/default_pre.prf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/mac/default_pre.prf \
@@ -356,6 +357,7 @@ Makefile: ../qt-opencv/qt-opencv.pro /Users/hallpaz/DevelopTools/Qt/5.5/clang_64
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/qt_config.prf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/macx-clang/qmake.conf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/exclusive_builds.prf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/default_pre.prf \
 		/Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/mac/default_pre.prf \
@@ -499,6 +501,7 @@ Makefile: ../qt-opencv/qt-opencv.pro /Users/hallpaz/DevelopTools/Qt/5.5/clang_64
 /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/qt_config.prf:
 /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/macx-clang/qmake.conf:
 /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/exclusive_builds.prf:
 /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/default_pre.prf:
 /Users/hallpaz/DevelopTools/Qt/5.5/clang_64/mkspecs/features/mac/default_pre.prf:
@@ -588,6 +591,7 @@ qrc_resources.cpp: ../qt-opencv/resources.qrc \
 		../qt-opencv/icons/camera.png \
 		../qt-opencv/icons/open.png \
 		../qt-opencv/icons/reset.png \
+		../qt-opencv/icons/orientation.png \
 		../qt-opencv/icons/grad.png \
 		../qt-opencv/icons/pyramid.png \
 		../qt-opencv/icons/process.png

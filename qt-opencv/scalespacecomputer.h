@@ -15,11 +15,12 @@ public:
     ScaleSpaceComputer(Mat& srcImg, int numberOfScales);
     void load(Mat& srcImg, int numberOfScales);
     bool gradientMagnitudeMap(Mat& dstImg, int scaleFactor);
-    bool gradientOrientationMap(Mat& dstImg, int scaleFactor);
+    bool gradientOrientationMap(Mat& dstImg, int scaleFactor, int magnitudeThreshold);
     const cv::Mat& operator[](std::size_t index) const;
     bool ready();
     void computeAllMagnitude();
     const cv::Mat& getMagMap(std::size_t index);
+    void clear();
 
 private:
     bool pyramid_loaded;
@@ -30,7 +31,7 @@ private:
     bool descendToScale(Mat& srcImg, Mat& dstImg, int scaleFactor);
     bool horizontalGradient(Mat& srcImg, Mat& dstImg);
     bool verticalGradient(Mat& srcImg, Mat& dstImg);
-    void inline drawArrows(Mat& angleImg, Mat& dstImg, int scaleFactor);
+    void inline drawArrows(Mat& angleImg, Mat& dstImg, int scaleFactor, int magnitudeThreshold);
 };
 
 #endif // SCALESPACECOMPUTER_H
