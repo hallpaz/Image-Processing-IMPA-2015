@@ -17,9 +17,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QRadioButton>
 #include <QtWidgets/QScrollArea>
-#include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
@@ -31,28 +29,16 @@ class Ui_MainWindow
 {
 public:
     QAction *actionLoadImage;
-    QAction *actionGradientOrientation;
+    QAction *actionHarris;
     QAction *actionSaveImage;
     QAction *actionReset;
     QAction *actionCameraCapture;
-    QAction *actionPyramid;
-    QAction *actionGradientMagnitude;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_2;
     QLabel *imageLabel;
-    QWidget *widget;
-    QRadioButton *scale_0;
-    QRadioButton *scale_1;
-    QRadioButton *scale_2;
-    QRadioButton *scale_3;
-    QLabel *label;
-    QWidget *threshold_area;
-    QLabel *mag_label;
-    QSlider *thresholdSlider;
-    QLabel *thresholdValue;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -61,19 +47,18 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(1024, 738);
-        MainWindow->setMinimumSize(QSize(0, 0));
+        MainWindow->resize(1011, 721);
         actionLoadImage = new QAction(MainWindow);
         actionLoadImage->setObjectName(QStringLiteral("actionLoadImage"));
         QIcon icon;
         icon.addFile(QStringLiteral(":/icons/open.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionLoadImage->setIcon(icon);
-        actionGradientOrientation = new QAction(MainWindow);
-        actionGradientOrientation->setObjectName(QStringLiteral("actionGradientOrientation"));
-        actionGradientOrientation->setCheckable(true);
+        actionHarris = new QAction(MainWindow);
+        actionHarris->setObjectName(QStringLiteral("actionHarris"));
+        actionHarris->setCheckable(true);
         QIcon icon1;
-        icon1.addFile(QStringLiteral(":/icons/orientation.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionGradientOrientation->setIcon(icon1);
+        icon1.addFile(QStringLiteral(":/icons/harris_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionHarris->setIcon(icon1);
         actionSaveImage = new QAction(MainWindow);
         actionSaveImage->setObjectName(QStringLiteral("actionSaveImage"));
         QIcon icon2;
@@ -90,18 +75,6 @@ public:
         QIcon icon4;
         icon4.addFile(QStringLiteral(":/icons/camera.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionCameraCapture->setIcon(icon4);
-        actionPyramid = new QAction(MainWindow);
-        actionPyramid->setObjectName(QStringLiteral("actionPyramid"));
-        actionPyramid->setCheckable(true);
-        QIcon icon5;
-        icon5.addFile(QStringLiteral(":/icons/pyramid.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionPyramid->setIcon(icon5);
-        actionGradientMagnitude = new QAction(MainWindow);
-        actionGradientMagnitude->setObjectName(QStringLiteral("actionGradientMagnitude"));
-        actionGradientMagnitude->setCheckable(true);
-        QIcon icon6;
-        icon6.addFile(QStringLiteral(":/icons/grad.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionGradientMagnitude->setIcon(icon6);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -113,7 +86,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 998, 560));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 991, 614));
         verticalLayout_2 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -127,53 +100,10 @@ public:
 
         verticalLayout->addWidget(scrollArea);
 
-        widget = new QWidget(centralWidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(widget->sizePolicy().hasHeightForWidth());
-        widget->setSizePolicy(sizePolicy);
-        widget->setMinimumSize(QSize(829, 20));
-        scale_0 = new QRadioButton(widget);
-        scale_0->setObjectName(QStringLiteral("scale_0"));
-        scale_0->setGeometry(QRect(150, 0, 51, 22));
-        scale_1 = new QRadioButton(widget);
-        scale_1->setObjectName(QStringLiteral("scale_1"));
-        scale_1->setGeometry(QRect(200, 0, 41, 22));
-        scale_2 = new QRadioButton(widget);
-        scale_2->setObjectName(QStringLiteral("scale_2"));
-        scale_2->setGeometry(QRect(240, 0, 41, 22));
-        scale_3 = new QRadioButton(widget);
-        scale_3->setObjectName(QStringLiteral("scale_3"));
-        scale_3->setGeometry(QRect(280, 0, 41, 22));
-        label = new QLabel(widget);
-        label->setObjectName(QStringLiteral("label"));
-        label->setGeometry(QRect(20, 0, 121, 17));
-
-        verticalLayout->addWidget(widget);
-
-        threshold_area = new QWidget(centralWidget);
-        threshold_area->setObjectName(QStringLiteral("threshold_area"));
-        threshold_area->setMinimumSize(QSize(0, 25));
-        mag_label = new QLabel(threshold_area);
-        mag_label->setObjectName(QStringLiteral("mag_label"));
-        mag_label->setGeometry(QRect(10, 0, 191, 16));
-        thresholdSlider = new QSlider(threshold_area);
-        thresholdSlider->setObjectName(QStringLiteral("thresholdSlider"));
-        thresholdSlider->setGeometry(QRect(280, 0, 701, 22));
-        thresholdSlider->setMaximum(255);
-        thresholdSlider->setOrientation(Qt::Horizontal);
-        thresholdValue = new QLabel(threshold_area);
-        thresholdValue->setObjectName(QStringLiteral("thresholdValue"));
-        thresholdValue->setGeometry(QRect(220, 0, 41, 16));
-
-        verticalLayout->addWidget(threshold_area);
-
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1024, 22));
+        menuBar->setGeometry(QRect(0, 0, 1011, 25));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -183,9 +113,7 @@ public:
         MainWindow->setStatusBar(statusBar);
 
         mainToolBar->addAction(actionCameraCapture);
-        mainToolBar->addAction(actionPyramid);
-        mainToolBar->addAction(actionGradientMagnitude);
-        mainToolBar->addAction(actionGradientOrientation);
+        mainToolBar->addAction(actionHarris);
         mainToolBar->addAction(actionLoadImage);
         mainToolBar->addAction(actionSaveImage);
 
@@ -196,17 +124,17 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Image Pyramids", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", 0));
         actionLoadImage->setText(QApplication::translate("MainWindow", "LoadImage", 0));
 #ifndef QT_NO_TOOLTIP
         actionLoadImage->setToolTip(QApplication::translate("MainWindow", "Load an image from file", 0));
 #endif // QT_NO_TOOLTIP
         actionLoadImage->setShortcut(QApplication::translate("MainWindow", "Ctrl+O", 0));
-        actionGradientOrientation->setText(QApplication::translate("MainWindow", "Processing", 0));
+        actionHarris->setText(QApplication::translate("MainWindow", "Harris Corner Detector", 0));
 #ifndef QT_NO_TOOLTIP
-        actionGradientOrientation->setToolTip(QApplication::translate("MainWindow", "Gradient Orientation", 0));
+        actionHarris->setToolTip(QApplication::translate("MainWindow", "Apply Harris Corner Detector", 0));
 #endif // QT_NO_TOOLTIP
-        actionGradientOrientation->setShortcut(QApplication::translate("MainWindow", "Ctrl+P", 0));
+        actionHarris->setShortcut(QApplication::translate("MainWindow", "Ctrl+P", 0));
         actionSaveImage->setText(QApplication::translate("MainWindow", "SaveImage", 0));
 #ifndef QT_NO_TOOLTIP
         actionSaveImage->setToolTip(QApplication::translate("MainWindow", "Save the image", 0));
@@ -221,22 +149,7 @@ public:
 #ifndef QT_NO_TOOLTIP
         actionCameraCapture->setToolTip(QApplication::translate("MainWindow", "Capture images from camera", 0));
 #endif // QT_NO_TOOLTIP
-        actionPyramid->setText(QApplication::translate("MainWindow", "Pyramid", 0));
-#ifndef QT_NO_TOOLTIP
-        actionPyramid->setToolTip(QApplication::translate("MainWindow", "Show Image Pyramid", 0));
-#endif // QT_NO_TOOLTIP
-        actionGradientMagnitude->setText(QApplication::translate("MainWindow", "GradientMagnitude", 0));
-#ifndef QT_NO_TOOLTIP
-        actionGradientMagnitude->setToolTip(QApplication::translate("MainWindow", "Gradient Magnitude", 0));
-#endif // QT_NO_TOOLTIP
         imageLabel->setText(QString());
-        scale_0->setText(QApplication::translate("MainWindow", "0", 0));
-        scale_1->setText(QApplication::translate("MainWindow", "1", 0));
-        scale_2->setText(QApplication::translate("MainWindow", "2", 0));
-        scale_3->setText(QApplication::translate("MainWindow", "3", 0));
-        label->setText(QApplication::translate("MainWindow", "Current Scale", 0));
-        mag_label->setText(QApplication::translate("MainWindow", "Gradient Magnitude Threshold", 0));
-        thresholdValue->setText(QApplication::translate("MainWindow", "0", 0));
     } // retranslateUi
 
 };
