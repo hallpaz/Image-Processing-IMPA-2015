@@ -18,7 +18,8 @@ public:
     ~MainWindow();
 
 protected:
-    cv::Mat applyHarrisCornerDetector( cv::Mat &cvImage );
+    void applyHarrisCornerDetector();
+    void applySIFTDetector();
     
 protected:
     cv::Mat currentImage;
@@ -33,16 +34,23 @@ private slots:
 
     void on_actionSaveImage_triggered();
 
-    void on_actionReset_triggered();
-
     void on_actionCameraCapture_toggled(bool toggle);
 
     void on_actionHarris_toggled(bool arg1);
+
+    void on_thresholdSlider_sliderMoved(int position);
+
+    void on_apertureSpinBox_valueChanged(double arg1);
+
+    void on_blockSpinBox_valueChanged(double arg1);
 
 private:
     Ui::MainWindow *ui;
     void updateDisplay();
     bool shouldApplyHarrisDetector;
+    bool shouldApplySIFTDetector;
+    int blockSize, apertureSize, threshold;
+    double k;
 };
 
 #endif // MAINWINDOW_H

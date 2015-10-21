@@ -9,6 +9,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace cv;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,8 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     shouldApplyHarrisDetector = false;
+    blockSize = 2; ui->blockSpinBox->setValue(blockSize);
+    apertureSize = 3; ui->apertureSpinBox->setValue(apertureSize);
+    k = 0.04;
+    threshold = 200; ui->thresholdSlider->setValue(threshold);
+    ui->threshold_value->setText(QString::number(threshold));
 
-    m_timer.start(20);
+    m_timer.start(50);
     connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
 }
 
@@ -26,13 +32,37 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-cv::Mat MainWindow::applyHarrisCornerDetector( cv::Mat &cvImage )
+void MainWindow::applyHarrisCornerDetector()
 {
     //NOTE: Example using blur filtering
-    cv::Mat dst = currentImage.clone();
-    cout << "should be applying Harris Corner Detector" << endl;
+    if(shouldApplySIFTDetector){
 
-    return dst;
+    }
+    cv::Mat dst;
+
+    cvtColor(currentImage, dst, COLOR_BGR2GRAY );
+    cornerHarris( dst, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
+    normalize( dst, dst, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
+    //convertScaleAbs( dst_norm, dst_norm_scaled );
+    for( int j = 0; j < dst.rows ; j++ )
+       { for( int i = 0; i < dst.cols; i++ )
+            {
+              if( (int) dst.at<float>(j,i) > threshold )
+                {
+                 circle( currentImage, Point( i, j ), 5,  Scalar(0, 255, 0), 2, 8, 0 );
+                }
+            }
+       }
+
+    return;
+}
+
+void MainWindow::applySIFTDetector()
+{
+    cout << "Should be applying SIFT" << endl;
+    if(shouldApplyHarrisDetector){
+        ui->actionHarris->toggle();
+    }
 }
 
 void MainWindow::captureAndShowVideoFrame()
@@ -42,8 +72,8 @@ void MainWindow::captureAndShowVideoFrame()
 
     cv::Mat frame;
     m_cvCamera >> frame;
-    currentImage = frame.clone();
-    cout << frame.channels() << endl;
+    cvtColor(frame.clone(), currentImage, CV_BGR2RGB);
+    //cout << frame.channels() << endl;
 
     updateDisplay();
 }
@@ -58,15 +88,16 @@ void MainWindow::on_actionLoadImage_triggered()
     if( ! currentImage.data )
         return;
 
-    cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
-    cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
+    //cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
+    cv::cvtColor( currentImage, currentImage, CV_BGR2RGB );
+    updateDisplay();
 
-    QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
+    /*QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
     if( image.isNull() )
         return;
 
     QPixmap pixmap = QPixmap::fromImage( image );
-    ui->imageLabel->setPixmap( pixmap );
+    ui->imageLabel->setPixmap( pixmap );*/
 
 }
 
@@ -89,22 +120,6 @@ void MainWindow::on_actionSaveImage_triggered()
 
 }
 
-void MainWindow::on_actionReset_triggered()
-{
-    if( ! currentImage.data )
-        return;
-
-    cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
-    cv::cvtColor( currentImage, cvRGBImage, CV_BGR2RGB );
-
-    QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
-    if( image.isNull() )
-        return;
-
-    QPixmap pixmap = QPixmap::fromImage( image );
-    ui->imageLabel->setPixmap( pixmap );
-}
-
 
 void MainWindow::on_actionCameraCapture_toggled(bool toggle)
 {
@@ -113,11 +128,12 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
         if( ! m_cvCamera.isOpened() )
         {
             //NOTE: Open the first camera
-            m_cvCamera.open(CV_CAP_OPENNI_BGR_IMAGE);
+            m_cvCamera.open(0);
+            m_cvCamera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
+            m_cvCamera.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
         }
         ui->actionLoadImage->setDisabled( true );
         ui->actionSaveImage->setDisabled( true );
-        ui->actionReset->setDisabled( true );
     }
     else
     {
@@ -127,20 +143,19 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
         }
         ui->actionLoadImage->setDisabled( false );
         ui->actionSaveImage->setDisabled( false );
-        ui->actionReset->setDisabled( false );
-
     }
 }
 
 
 void MainWindow::updateDisplay(){
-    cout << "update display" << endl;
     QImage image;
+    if(shouldApplyHarrisDetector){
+        applyHarrisCornerDetector();
+    }
+    if(shouldApplySIFTDetector){
+        applySIFTDetector();
+    }
     if(currentImage.channels() == 1){
-        if(shouldApplyHarrisDetector){
-            //scaleProcesseur.gradientMagnitudeMap(currentImage, current_scale);
-            cout << "Should apply Harris Corner Detector" << endl;
-        }
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_Grayscale8 );
     }else{
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_RGB888 );
@@ -154,4 +169,21 @@ void MainWindow::on_actionHarris_toggled(bool toggle)
 {
     shouldApplyHarrisDetector = toggle;
     updateDisplay();
+}
+
+void MainWindow::on_thresholdSlider_sliderMoved(int position)
+{
+    threshold = position;
+    QString labelValue = QString::number(position);
+    ui->threshold_value->setText(labelValue);
+}
+
+void MainWindow::on_apertureSpinBox_valueChanged(double newvalue)
+{
+    apertureSize = (int) newvalue;
+}
+
+void MainWindow::on_blockSpinBox_valueChanged(double newvalue)
+{
+    blockSize = (int) newvalue;
 }
