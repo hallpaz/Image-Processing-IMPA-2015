@@ -178,6 +178,7 @@
    </attribute>
    <addaction name="actionCameraCapture"/>
    <addaction name="actionHarris"/>
+   <addaction name="actionSift"/>
    <addaction name="actionLoadImage"/>
    <addaction name="actionSaveImage"/>
   </widget>
@@ -243,6 +244,18 @@
    </property>
    <property name="toolTip">
     <string>Capture images from camera</string>
+   </property>
+  </action>
+  <action name="actionSift">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/sift.png</normaloff>:/icons/sift.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sift</string>
+   </property>
+   <property name="toolTip">
+    <string>Apply Sift Detector</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/features2d/features2d.hpp>
 
 #include <iostream>
 
@@ -17,11 +18,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     shouldApplyHarrisDetector = false;
+    shouldApplySIFTDetector = false;
     blockSize = 2; ui->blockSpinBox->setValue(blockSize);
     apertureSize = 3; ui->apertureSpinBox->setValue(apertureSize);
     k = 0.04;
     threshold = 200; ui->thresholdSlider->setValue(threshold);
     ui->threshold_value->setText(QString::number(threshold));
+    akazeDetector = AKAZE::create();
 
     m_timer.start(50);
     connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
@@ -36,7 +39,7 @@ void MainWindow::applyHarrisCornerDetector()
 {
     //NOTE: Example using blur filtering
     if(shouldApplySIFTDetector){
-
+        ui->actionSift->toggle();
     }
     cv::Mat dst;
 
@@ -59,10 +62,19 @@ void MainWindow::applyHarrisCornerDetector()
 
 void MainWindow::applySIFTDetector()
 {
-    cout << "Should be applying SIFT" << endl;
-    if(shouldApplyHarrisDetector){
-        ui->actionHarris->toggle();
-    }
+    //cv::SiftFeatureDetector detector;
+    Mat dst;
+    vector<KeyPoint> keypoints;
+
+    cvtColor(currentImage, dst, COLOR_BGR2GRAY );
+    akazeDetector->detect(dst, keypoints);
+
+    // If you would like to draw the detected keypoint just to check
+    //Mat outputImage;
+    Scalar keypointColor = Scalar(255, 0, 0);     // Blue keypoints.
+    //drawKeypoints(currentImage, keypoints, currentImage, keypointColor, DrawMatchesFlags::DEFAULT);
+    drawKeypoints(dst, keypoints, currentImage, keypointColor);
+
 }
 
 void MainWindow::captureAndShowVideoFrame()
@@ -168,6 +180,9 @@ void MainWindow::updateDisplay(){
 void MainWindow::on_actionHarris_toggled(bool toggle)
 {
     shouldApplyHarrisDetector = toggle;
+    if(shouldApplySIFTDetector){
+        ui->actionSift->toggle();
+    }
     updateDisplay();
 }
 
@@ -186,4 +201,13 @@ void MainWindow::on_apertureSpinBox_valueChanged(double newvalue)
 void MainWindow::on_blockSpinBox_valueChanged(double newvalue)
 {
     blockSize = (int) newvalue;
+}
+
+void MainWindow::on_actionSift_toggled(bool toggle)
+{
+    shouldApplySIFTDetector = toggle;
+    if(shouldApplyHarrisDetector){
+        ui->actionHarris->toggle();
+    }
+    updateDisplay();
 }

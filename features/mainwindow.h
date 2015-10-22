@@ -44,6 +44,8 @@ private slots:
 
     void on_blockSpinBox_valueChanged(double arg1);
 
+    void on_actionSift_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
     void updateDisplay();
@@ -51,6 +53,7 @@ private:
     bool shouldApplySIFTDetector;
     int blockSize, apertureSize, threshold;
     double k;
+    cv::AKAZE *akazeDetector;
 };
 
 #endif // MAINWINDOW_H
