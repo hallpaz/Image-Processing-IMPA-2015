@@ -541,6 +541,7 @@ qrc_resources.cpp: ../features/resources.qrc \
 		../features/icons/camera.png \
 		../features/icons/open.png \
 		../features/icons/reset.png \
+		../features/icons/sift.png \
 		../features/icons/harris_icon.png \
 		../features/icons/process.png
 	/home/hallpaz/DevelopTools/Qt/5.5/gcc_64/bin/rcc -name resources ../features/resources.qrc -o qrc_resources.cpp
@@ -1106,7 +1107,8 @@ mainwindow.o: ../features/mainwindow.cpp ../features/mainwindow.h \
 		../../../../DevelopTools/Qt/5.5/gcc_64/include/QtWidgets/qdialog.h \
 		../../../../DevelopTools/Qt/5.5/gcc_64/include/QtCore/QDebug \
 		/usr/local/include/opencv2/highgui/highgui.hpp \
-		/usr/local/include/opencv2/imgproc/imgproc.hpp
+		/usr/local/include/opencv2/imgproc/imgproc.hpp \
+		/usr/local/include/opencv2/features2d/features2d.hpp
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../features/mainwindow.cpp
 
 featuresdetector.o: ../features/featuresdetector.cpp ../features/featuresdetector.h

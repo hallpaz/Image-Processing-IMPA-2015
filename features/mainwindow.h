@@ -19,7 +19,7 @@ public:
 
 protected:
     void applyHarrisCornerDetector();
-    void applySIFTDetector();
+    void applyAKAZEDetector();
     
 protected:
     cv::Mat currentImage;
@@ -50,7 +50,7 @@ private:
     Ui::MainWindow *ui;
     void updateDisplay();
     bool shouldApplyHarrisDetector;
-    bool shouldApplySIFTDetector;
+    bool shouldApplyAKAZEDetector;
     int blockSize, apertureSize, threshold;
     double k;
     cv::AKAZE *akazeDetector;

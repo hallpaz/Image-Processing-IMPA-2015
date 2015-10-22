@@ -13,11 +13,13 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QScrollArea>
+#include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
@@ -31,14 +33,22 @@ public:
     QAction *actionLoadImage;
     QAction *actionHarris;
     QAction *actionSaveImage;
-    QAction *actionReset;
     QAction *actionCameraCapture;
+    QAction *actionSift;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_2;
     QLabel *imageLabel;
+    QWidget *widget;
+    QSlider *thresholdSlider;
+    QLabel *threshold_label;
+    QLabel *threshold_value;
+    QDoubleSpinBox *apertureSpinBox;
+    QDoubleSpinBox *blockSpinBox;
+    QLabel *aperture_label;
+    QLabel *block_size_label;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -64,17 +74,17 @@ public:
         QIcon icon2;
         icon2.addFile(QStringLiteral(":/icons/save.png"), QSize(), QIcon::Normal, QIcon::Off);
         actionSaveImage->setIcon(icon2);
-        actionReset = new QAction(MainWindow);
-        actionReset->setObjectName(QStringLiteral("actionReset"));
-        QIcon icon3;
-        icon3.addFile(QStringLiteral(":/icons/reset.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionReset->setIcon(icon3);
         actionCameraCapture = new QAction(MainWindow);
         actionCameraCapture->setObjectName(QStringLiteral("actionCameraCapture"));
         actionCameraCapture->setCheckable(true);
+        QIcon icon3;
+        icon3.addFile(QStringLiteral(":/icons/camera.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionCameraCapture->setIcon(icon3);
+        actionSift = new QAction(MainWindow);
+        actionSift->setObjectName(QStringLiteral("actionSift"));
         QIcon icon4;
-        icon4.addFile(QStringLiteral(":/icons/camera.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionCameraCapture->setIcon(icon4);
+        icon4.addFile(QStringLiteral(":/icons/sift.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionSift->setIcon(icon4);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -86,7 +96,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 991, 614));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 985, 568));
         verticalLayout_2 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -100,10 +110,45 @@ public:
 
         verticalLayout->addWidget(scrollArea);
 
+        widget = new QWidget(centralWidget);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setMinimumSize(QSize(0, 30));
+        thresholdSlider = new QSlider(widget);
+        thresholdSlider->setObjectName(QStringLiteral("thresholdSlider"));
+        thresholdSlider->setGeometry(QRect(140, 0, 341, 22));
+        thresholdSlider->setMinimum(100);
+        thresholdSlider->setMaximum(255);
+        thresholdSlider->setOrientation(Qt::Horizontal);
+        threshold_label = new QLabel(widget);
+        threshold_label->setObjectName(QStringLiteral("threshold_label"));
+        threshold_label->setGeometry(QRect(10, 0, 71, 16));
+        threshold_value = new QLabel(widget);
+        threshold_value->setObjectName(QStringLiteral("threshold_value"));
+        threshold_value->setGeometry(QRect(90, 0, 41, 16));
+        apertureSpinBox = new QDoubleSpinBox(widget);
+        apertureSpinBox->setObjectName(QStringLiteral("apertureSpinBox"));
+        apertureSpinBox->setGeometry(QRect(610, 0, 67, 24));
+        apertureSpinBox->setDecimals(0);
+        apertureSpinBox->setMinimum(1);
+        apertureSpinBox->setMaximum(31);
+        apertureSpinBox->setSingleStep(2);
+        blockSpinBox = new QDoubleSpinBox(widget);
+        blockSpinBox->setObjectName(QStringLiteral("blockSpinBox"));
+        blockSpinBox->setGeometry(QRect(870, 0, 67, 24));
+        blockSpinBox->setDecimals(0);
+        aperture_label = new QLabel(widget);
+        aperture_label->setObjectName(QStringLiteral("aperture_label"));
+        aperture_label->setGeometry(QRect(500, 0, 101, 16));
+        block_size_label = new QLabel(widget);
+        block_size_label->setObjectName(QStringLiteral("block_size_label"));
+        block_size_label->setGeometry(QRect(760, 10, 81, 16));
+
+        verticalLayout->addWidget(widget);
+
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1011, 25));
+        menuBar->setGeometry(QRect(0, 0, 1011, 22));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -114,6 +159,7 @@ public:
 
         mainToolBar->addAction(actionCameraCapture);
         mainToolBar->addAction(actionHarris);
+        mainToolBar->addAction(actionSift);
         mainToolBar->addAction(actionLoadImage);
         mainToolBar->addAction(actionSaveImage);
 
@@ -140,16 +186,19 @@ public:
         actionSaveImage->setToolTip(QApplication::translate("MainWindow", "Save the image", 0));
 #endif // QT_NO_TOOLTIP
         actionSaveImage->setShortcut(QApplication::translate("MainWindow", "Ctrl+S", 0));
-        actionReset->setText(QApplication::translate("MainWindow", "Reset", 0));
-#ifndef QT_NO_TOOLTIP
-        actionReset->setToolTip(QApplication::translate("MainWindow", "Undo filter applied ", 0));
-#endif // QT_NO_TOOLTIP
-        actionReset->setShortcut(QApplication::translate("MainWindow", "Ctrl+R", 0));
         actionCameraCapture->setText(QApplication::translate("MainWindow", "CameraCapture", 0));
 #ifndef QT_NO_TOOLTIP
         actionCameraCapture->setToolTip(QApplication::translate("MainWindow", "Capture images from camera", 0));
 #endif // QT_NO_TOOLTIP
+        actionSift->setText(QApplication::translate("MainWindow", "Sift", 0));
+#ifndef QT_NO_TOOLTIP
+        actionSift->setToolTip(QApplication::translate("MainWindow", "Apply Sift Detector", 0));
+#endif // QT_NO_TOOLTIP
         imageLabel->setText(QString());
+        threshold_label->setText(QApplication::translate("MainWindow", "Threshold:", 0));
+        threshold_value->setText(QApplication::translate("MainWindow", "0", 0));
+        aperture_label->setText(QApplication::translate("MainWindow", "Aperture Size:", 0));
+        block_size_label->setText(QApplication::translate("MainWindow", "Block Size:", 0));
     } // retranslateUi
 
 };
