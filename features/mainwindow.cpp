@@ -18,13 +18,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     shouldApplyHarrisDetector = false;
-    shouldApplyAKAZEDetector = false;
     blockSize = 2; ui->blockSpinBox->setValue(blockSize);
     apertureSize = 3; ui->apertureSpinBox->setValue(apertureSize);
     k = 0.04;
     threshold = 200; ui->thresholdSlider->setValue(threshold);
     ui->threshold_value->setText(QString::number(threshold));
     akazeDetector = AKAZE::create();
+    interactive = true;
 
     m_timer.start(50);
     connect( &m_timer, SIGNAL(timeout()), this, SLOT(captureAndShowVideoFrame()) );
@@ -37,16 +37,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::applyHarrisCornerDetector()
 {
-    //NOTE: Example using blur filtering
-    if(shouldApplyAKAZEDetector){
-        ui->actionSift->toggle();
-    }
     cv::Mat dst;
-
+    if(!interactive)
+        currentImage = originalImage.clone();
     cvtColor(currentImage, dst, COLOR_BGR2GRAY );
     cornerHarris( dst, dst, blockSize, apertureSize, k, BORDER_DEFAULT );
     normalize( dst, dst, 0, 255, NORM_MINMAX, CV_32FC1, Mat() );
-    //convertScaleAbs( dst_norm, dst_norm_scaled );
+    //convertScaleAbs( dst, dst );
     for( int j = 0; j < dst.rows ; j++ )
        { for( int i = 0; i < dst.cols; i++ )
             {
@@ -58,23 +55,6 @@ void MainWindow::applyHarrisCornerDetector()
        }
 
     return;
-}
-
-void MainWindow::applyAKAZEDetector()
-{
-    //cv::SiftFeatureDetector detector;
-    Mat dst;
-    vector<KeyPoint> keypoints;
-
-    cvtColor(currentImage, dst, COLOR_BGR2GRAY );
-    akazeDetector->detect(dst, keypoints);
-
-    // If you would like to draw the detected keypoint just to check
-    //Mat outputImage;
-    Scalar keypointColor = Scalar(0, 255, 0);
-    //drawKeypoints(currentImage, keypoints, currentImage, keypointColor, DrawMatchesFlags::DEFAULT);
-    drawKeypoints(dst, keypoints, currentImage, keypointColor, DrawMatchesFlags::DRAW_OVER_OUTIMG);
-
 }
 
 void MainWindow::captureAndShowVideoFrame()
@@ -103,6 +83,8 @@ void MainWindow::on_actionLoadImage_triggered()
     //cv::Mat cvRGBImage( currentImage.rows, currentImage.cols, currentImage.type() );
     cv::cvtColor( currentImage, currentImage, CV_BGR2RGB );
     updateDisplay();
+    originalImage = currentImage.clone();
+    interactive = false;
 
     /*QImage image = QImage( (uchar*)cvRGBImage.data, cvRGBImage.cols, cvRGBImage.rows, cvRGBImage.step, QImage::Format_RGB888 );
     if( image.isNull() )
@@ -139,6 +121,7 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
     {
         if( ! m_cvCamera.isOpened() )
         {
+            interactive = true;
             //NOTE: Open the first camera
             m_cvCamera.open(0);
             m_cvCamera.set(CV_CAP_PROP_FRAME_WIDTH, 640);
@@ -164,9 +147,7 @@ void MainWindow::updateDisplay(){
     if(shouldApplyHarrisDetector){
         applyHarrisCornerDetector();
     }
-    if(shouldApplyAKAZEDetector){
-        applyAKAZEDetector();
-    }
+
     if(currentImage.channels() == 1){
         image = QImage( (uchar*)currentImage.data, currentImage.cols, currentImage.rows, currentImage.step, QImage::Format_Grayscale8 );
     }else{
@@ -180,9 +161,11 @@ void MainWindow::updateDisplay(){
 void MainWindow::on_actionHarris_toggled(bool toggle)
 {
     shouldApplyHarrisDetector = toggle;
-    if(shouldApplyAKAZEDetector){
-        ui->actionSift->toggle();
+    if(!shouldApplyHarrisDetector){
+        interactive = true;
+        currentImage = originalImage.clone();
     }
+
     updateDisplay();
 }
 
@@ -191,21 +174,27 @@ void MainWindow::on_thresholdSlider_sliderMoved(int position)
     threshold = position;
     QString labelValue = QString::number(position);
     ui->threshold_value->setText(labelValue);
+    if(!interactive)
+        updateDisplay();
 }
 
 void MainWindow::on_apertureSpinBox_valueChanged(double newvalue)
 {
     apertureSize = (int) newvalue;
+    if(!interactive)
+        updateDisplay();
 }
 
 void MainWindow::on_blockSpinBox_valueChanged(double newvalue)
 {
     blockSize = (int) newvalue;
+    if(!interactive)
+        updateDisplay();
 }
 
 void MainWindow::on_actionSift_toggled(bool toggle)
 {
-    shouldApplyAKAZEDetector = toggle;
+    //shouldApplyAKAZEDetector = toggle;
     if(shouldApplyHarrisDetector){
         ui->actionHarris->toggle();
     }

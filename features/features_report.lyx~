@@ -1,5 +1,5 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
 \begin_document
 \begin_header
 \textclass article
@@ -12,13 +12,13 @@
 \font_roman default
 \font_sans default
 \font_typewriter default
+\font_math auto
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
-
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -30,15 +30,24 @@
 \use_hyperref false
 \papersize a4paper
 \use_geometry true
-\use_amsmath 1
-\use_esint 1
-\use_mhchem 1
-\use_mathdots 1
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 1
 \index Index
 \shortcut idx
@@ -66,43 +75,107 @@
 \begin_body
 
 \begin_layout Standard
-Instituto Nacional de Matemática Pura e Aplicada
+
+\lang brazilian
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Hallison Oliveira da Paz
+\align center
+
+\series bold
+INSTITUTO NACIONAL DE MATEMÁTICA PURA E APLICADA
 \end_layout
 
 \begin_layout Standard
-Processamento de Imagens
+
+\lang brazilian
+\begin_inset VSpace 4.5cm
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Assignment 3 - Features 
+\align center
+
+\series bold
+\lang brazilian
+HALLISON OLIVEIRA DA PAZ
 \end_layout
 
 \begin_layout Standard
-I
+\paragraph_spacing single
+\align center
+
+\lang brazilian
+\begin_inset VSpace 4.5cm
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
+CURSO DE PROCESSAMENTO DE IMAGENS
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
 \emph on
-n this assignment you need to implement one of several feature detection
- algorithms: corner detection, SIFT, and active contours.
+Assignment 3: Image Features
 \end_layout
 
 \begin_layout Standard
 
-\emph on
-The input image should always be converted to grayscale before processing
- it.
- When capturing images from a camera allow the program to capture and process
- the images continuously.
- The main parameters of each algorithm should be made available for interactive
- manipulation through keyboard/mouse interaction.
- Your report must include a description of the algorithm you implemented.
- 
+\lang brazilian
+\begin_inset VSpace 4.5cm
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Rio de Janeiro, Outubro de 2015
+\paragraph_spacing single
+\align center
+
+\series bold
+\lang brazilian
+RIO DE JANEIRO
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing single
+\align center
+
+\series bold
+\lang brazilian
+2015
+\end_layout
+
+\begin_layout Standard
+
+\lang brazilian
+\begin_inset Newpage newpage
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -135,10 +208,14 @@ assignment
 Image Features
 \emph default
  do curso de Processamento de Imagens.
- Foram utilizadas a biblioteca OpenCV (3.0) para implementação das funções
+ Foram utilizados a biblioteca OpenCV (3.0) para implementação das funções
  de visão computacional, em particular para a detecção de cantos com o algoritmo
- de Harris, e o ambiente de desenvolvimento integrado QT Creator para a
- confecção das interfaces gráficas.
+ de 
+\emph on
+Harris
+\emph default
+, e o ambiente de desenvolvimento integrado QT Creator para a confecção
+ das interfaces gráficas.
  O código fonte encontra-se no repositório 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -171,8 +248,11 @@ indent
 
 \begin_layout Standard
 O Algoritmo de Harris para detecção de cantos e arestas é um dos algoritmos
- mais antigos na área de detecção de features e baseia-se em uma ideia bastante
- simples e intuitiva.
+ mais antigos para a detecção de 
+\emph on
+features
+\emph default
+ e baseia-se em uma ideia bastante simples e intuitiva.
  A ideia é perceber que em uma imagem, as regiões que representam cantos
  são regiões onde o gradiente apresenta uma alta variação em qualquer direção.
  Isto porque, em regiões de transição (variações bruscas) no domínio da
@@ -183,9 +263,12 @@ O Algoritmo de Harris para detecção de cantos e arestas é um dos algoritmos
 \end_layout
 
 \begin_layout Standard
-Assim, para cada pixel da imagem, podemos definir uma janela que represente
- uma certa vizinhança de pixels e, então, podemos calcular uma medida de
- energia para esta janela, atribuindo um determinado peso a cada pixel.
+Assim, para criar um modelo matemático que possa lidar com esta ideia, podemos
+ definir janelas que representem vizinhanças de pixels na imagem e, então,
+ calculamos uma medida de variação de energia obtida ao movermos esta janela
+ em várias direções.
+ Pode-se atribuir pesos diferentes para pixels mais afastados do centro
+ da janela, caso se deseje.
  A equação 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -199,7 +282,7 @@ reference "eq:window_energy"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-E(u,v)=\sum w(x,y)[I(x+u,y+v)−I(x,y)]^{2}\label{eq:window_energy}
+E(u,v)=\sum_{x,y}w(x,y)[I(x+u,y+v)−I(x,y)]^{2}\label{eq:window_energy}
 \end{equation}
 
 \end_inset
@@ -208,29 +291,29 @@ E(u,v)=\sum w(x,y)[I(x+u,y+v)−I(x,y)]^{2}\label{eq:window_energy}
 \end_layout
 
 \begin_layout Standard
-Em que:
+Na equação, temos:
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $w(x,y)$
 \end_inset
 
- é a janela referente à posição 
+ é a função de janela referente à posição 
 \begin_inset Formula $(x,y)$
 \end_inset
 
- 
+ da imagem (pesos dos pixels).
 \end_layout
 
 \begin_layout Itemize
 \begin_inset Formula $I(x,y)$
 \end_inset
 
- é a intensidade na posição 
+ é a intensidade do pixel na posição 
 \begin_inset Formula $(x,y)$
 \end_inset
 
- 
+ da imagem.
 \end_layout
 
 \begin_layout Itemize
@@ -241,7 +324,11 @@ Em que:
 \begin_inset Formula $(x+u,y+v)$
 \end_inset
 
+ (transladada de 
+\begin_inset Formula $(u,v)$
+\end_inset
 
+ ).
 \end_layout
 
 \begin_layout Standard
@@ -261,9 +348,15 @@ indent
 \end_layout
 
 \begin_layout Standard
-Se transladarmos esta janela em várias direções, podemos medir o quanto
- que esta energia varia e, assim, caracterizar a região em análise.
- Dividindo em 3 casos, temos:
+A variação medida pela equação 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:window_energy"
+
+\end_inset
+
+ nos permite caracterizar a região em análise de acordo com os 3 casos seguintes
+:
 \end_layout
 
 \begin_layout Enumerate
@@ -272,17 +365,14 @@ Se a variação for pequena em toda as direções, estamos em uma região lisa,
 \end_layout
 
 \begin_layout Enumerate
-Se a variação for grande em apenas uma direção e pequena na direção ortogonal,
- estamos sobre uma aresta.
+Se a variação for grande em apenas uma direção e pequena nas demais, estamos
+ sobre uma aresta.
  A direção de maior variação é a direção normal à aresta (direção do gradiente).
 \end_layout
 
 \begin_layout Enumerate
-Se a variação for grande em 
-\series bold
-ambas
-\series default
- as direções, então temos um bom candidato a canto.
+Se a variação for grande em várias direções, então temos um bom candidato
+ a canto.
 \end_layout
 
 \begin_layout Standard
@@ -319,7 +409,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 \begin_inset CommandInset label
@@ -354,8 +444,8 @@ key "harris_region"
 
 \begin_layout Standard
 Portanto, a ideia do algoritmo de Harris é procurar por janelas onde há
- alta variação.
- Queremos, então, maximizar a função de energia da equação (
+ alta variação, o que se traduz em maximizar a função de energia da equação
+ (
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:window_energy"
@@ -378,7 +468,11 @@ Usando uma aproximação por expansão de Taylor, temos:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $E(u,v)≈∑w(x,y)[I(x,y)+uI_{x}+vI_{y}−I(x,y)]^{2}\text{≈∑}w(x,y)(u^{2}I_{x}^{2}+2uvI_{x}I_{y}+v^{2}I_{y}^{2})$
+\begin_inset Formula 
+\[
+E(u,v)≈\sum_{x,y}w(x,y)[I(x,y)+uI_{x}+vI_{y}−I(x,y)]^{2}\text{≈\sum_{x,y}}w(x,y)(u^{2}I_{x}^{2}+2uvI_{x}I_{y}+v^{2}I_{y}^{2})
+\]
+
 \end_inset
 
 
@@ -403,14 +497,18 @@ Que pode ser expressa em forma matricial como:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $E(u,v)≈[\begin{array}{cc}
-u & v\end{array}](∑w(x,y)\left[\begin{array}{cc}
+\begin_inset Formula 
+\[
+E(u,v)≈[\begin{array}{cc}
+u & v\end{array}](\sum_{x,y}w(x,y)\left[\begin{array}{cc}
 I_{x}^{2} & I_{x}I_{y}\\
 I_{x}I_{y} & I_{y}^{2}
 \end{array}\right])\left[\begin{array}{c}
 u\\
 v
-\end{array}\right]$
+\end{array}\right]
+\]
+
 \end_inset
 
 
@@ -435,10 +533,14 @@ Seja:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $M=\text{∑}w(x,y)\left[\begin{array}{cc}
+\begin_inset Formula 
+\[
+M=\sum_{x,y}w(x,y)\left[\begin{array}{cc}
 I_{x}^{2} & I_{x}I_{y}\\
 I_{x}I_{y} & I_{y}^{2}
-\end{array}\right]$
+\end{array}\right]
+\]
+
 \end_inset
 
 
@@ -537,17 +639,17 @@ reference "eq:corner_response"
 \end_inset
 
  e 
-\begin_inset Formula $trace(M)=\lambda_{1}+\lambda_{2}$
+\begin_inset Formula $traço(M)=\lambda_{1}+\lambda_{2}$
 \end_inset
 
- .
+.
  A função de resposta do canto foi definida como:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-R=det(M)−k(trace(M))^{2}\label{eq:corner_response}
+R=det(M)−k(traço(M))^{2}\label{eq:corner_response}
 \end{equation}
 
 \end_inset
@@ -575,13 +677,15 @@ Assim, estabelece-se um critério bastante objetivo para classificação das
  for pequeno, tem-se uma região lisa, se R for negativo, tem-se uma aresta
  e se for positivo temos um candidato a canto.
  Assim, basta apenas estipular um limiar positivo acima do qual consideraremos
- que o há um canto dentro da janela em questão.
+ que há um canto dentro da janela em questão.
 \end_layout
 
 \begin_layout Standard
 Por conta de sua simplicidade, algumas propriedades importantes não podem
- ser captadas pelos algoritmo de Harris, imprimindo-lhe algumas deficiências
- como sensibilidade à variação de escala e de perspectiva.
+ ser captadas pelos algoritmo de Harris, imprimindo-lhe algumas deficiências.
+ Em particular, a sensibilidade à variação de escala, devido à utilização
+ de janelas de tamanho fixo, restringe uma quantidade considerável de possíveis
+ aplicações.
 \end_layout
 
 \begin_layout Section
@@ -615,14 +719,20 @@ nto contínuo.
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/my_feature_program.png
+	scale 40
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Interface do programa
@@ -643,7 +753,7 @@ Interface do programa
 \end_layout
 
 \begin_layout Standard
-A imagem carregada é, então, exibida na janela principal do programa.
+A imagem carregada é exibida na janela principal do programa.
  Caso seja escolhida a opção de captura contínua, a leitura da câmera fará
  atualização constante dessa imagem.
 \end_layout
@@ -659,6 +769,12 @@ Apply Harris Detector
 
 , realiza-se uma cópia da imagem exibida, convertendo-a para um espaço de
  cor em escala de cinza.
+ A imagem monocromática é, então, submetida ao algoritmo de Harris para
+ detecção de cantos.
+ Os parâmetros do algoritmo (tamanho da janela, tamanho da máscara de derivada,
+ valor limiar para a função de resposta de canto e constante k empírica)
+ são expostos para manipulação do usuário, que pode verificar o efeito de
+ alterar cada um deles.
 \end_layout
 
 \begin_layout Bibliography

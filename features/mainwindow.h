@@ -19,10 +19,9 @@ public:
 
 protected:
     void applyHarrisCornerDetector();
-    void applyAKAZEDetector();
-    
+
 protected:
-    cv::Mat currentImage;
+    cv::Mat currentImage, originalImage;
     cv::VideoCapture m_cvCamera;
     QTimer m_timer;
 
@@ -50,7 +49,7 @@ private:
     Ui::MainWindow *ui;
     void updateDisplay();
     bool shouldApplyHarrisDetector;
-    bool shouldApplyAKAZEDetector;
+    bool interactive;
     int blockSize, apertureSize, threshold;
     double k;
     cv::AKAZE *akazeDetector;

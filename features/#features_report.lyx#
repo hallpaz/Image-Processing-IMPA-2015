@@ -1,5 +1,5 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
 \begin_document
 \begin_header
 \textclass article
@@ -12,13 +12,13 @@
 \font_roman default
 \font_sans default
 \font_typewriter default
+\font_math auto
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
-
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -30,15 +30,24 @@
 \use_hyperref false
 \papersize a4paper
 \use_geometry true
-\use_amsmath 1
-\use_esint 1
-\use_mhchem 1
-\use_mathdots 1
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 1
 \index Index
 \shortcut idx
@@ -81,10 +90,6 @@ Processamento de Imagens
 Assignment 3 - Features 
 \end_layout
 
-\begin_layout Section
-Resolução do problema
-\end_layout
-
 \begin_layout Standard
 I
 \emph on
@@ -106,13 +111,84 @@ The input image should always be converted to grayscale before processing
 \end_layout
 
 \begin_layout Standard
-Com o auxílio da biblioteca OpenCV (3.0), implementou-se um programa para
- realizar a detecção de features utilizando o algoritmo Harris Corner Detector.
+Rio de Janeiro, Outubro de 2015
+\end_layout
+
+\begin_layout Section
+Introdução
 \end_layout
 
 \begin_layout Standard
-Este é um dos algoritmos mais antigos na área de detecção de features e
- baseia-se em uma ideia bastante simples e intuitiva.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Este relatório descreve a implementação do 
+\emph on
+assignment
+\emph default
+ 
+\emph on
+Image Features
+\emph default
+ do curso de Processamento de Imagens.
+ Foram utilizados a biblioteca OpenCV (3.0) para implementação das funções
+ de visão computacional, em particular para a detecção de cantos com o algoritmo
+ de 
+\emph on
+Harris
+\emph default
+, e o ambiente de desenvolvimento integrado QT Creator para a confecção
+ das interfaces gráficas.
+ O código fonte encontra-se no repositório 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hallpaz_github"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Explicação do Algoritmo
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+O Algoritmo de Harris para detecção de cantos e arestas é um dos algoritmos
+ mais antigos para a detecção de 
+\emph on
+features
+\emph default
+ e baseia-se em uma ideia bastante simples e intuitiva.
  A ideia é perceber que em uma imagem, as regiões que representam cantos
  são regiões onde o gradiente apresenta uma alta variação em qualquer direção.
  Isto porque, em regiões de transição (variações bruscas) no domínio da
@@ -123,56 +199,100 @@ Este é um dos algoritmos mais antigos na área de detecção de features e
 \end_layout
 
 \begin_layout Standard
-Assim, para cada pixel da imagem, podemos definir uma janela que represente
- uma certa vizinhança de pixels e, então, podemos calcular uma medida de
- energia para esta janela, atribuindo um determinado peso a cada pixel.
- A equação XXX traduz esta ideia.
+Assim, para criar um modelo matemático que possa lidar com esta ideia, podemos
+ definir janelas que representem vizinhanças de pixels na imagem e, então,
+ calculamos uma medida de variação de energia obtida ao movermos esta janela
+ em várias direções.
+ Pode-se atribuir pesos diferentes para pixels mais afastados do centro
+ da janela, caso se deseje.
+ A equação 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:window_energy"
+
+\end_inset
+
+ traduz esta ideia.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $E(u,v)=∑w(x,y)[I(x+u,y+v)−I(x,y)]^{2}$
+\begin_inset Formula 
+\begin{equation}
+E(u,v)=\sum w(x,y)[I(x+u,y+v)−I(x,y)]^{2}\label{eq:window_energy}
+\end{equation}
+
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-where:
+Na equação, temos:
 \end_layout
 
-\begin_layout Standard
+\begin_layout Itemize
 \begin_inset Formula $w(x,y)$
 \end_inset
 
-is the window at position 
+ é a função de janela referente à posição 
 \begin_inset Formula $(x,y)$
 \end_inset
 
- 
+ da imagem (pesos dos pixels).
 \end_layout
 
-\begin_layout Standard
+\begin_layout Itemize
 \begin_inset Formula $I(x,y)$
 \end_inset
 
-is the intensity at (x,y) 
+ é a intensidade do pixel na posição 
+\begin_inset Formula $(x,y)$
+\end_inset
+
+ da imagem.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Itemize
 \begin_inset Formula $I(x+u,y+v)$
 \end_inset
 
-is the intensity at the moved window 
+ é a intensidade na janela movida para a posição 
 \begin_inset Formula $(x+u,y+v)$
+\end_inset
+
+ (transladada de 
+\begin_inset Formula $(u,v)$
+\end_inset
+
+ ).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Se transladarmos esta janela em várias direções, podemos medir o quanto
- que esta energia varia e, assim, caracterizar a região em análise.
- Dividindo em 3 casos, temos:
+A variação medida pela equação 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:window_energy"
+
+\end_inset
+
+ nos permite caracterizar a região em análise de acordo com os 3 casos seguintes
+:
 \end_layout
 
 \begin_layout Enumerate
@@ -181,91 +301,241 @@ Se a variação for pequena em toda as direções, estamos em uma região lisa,
 \end_layout
 
 \begin_layout Enumerate
-Se a variação for grande em apenas uma direção e pequena na direção ortogonal,
- estamos sobre uma aresta.
+Se a variação for grande em apenas uma direção e pequena nas demais, estamos
+ sobre uma aresta.
  A direção de maior variação é a direção normal à aresta (direção do gradiente).
 \end_layout
 
 \begin_layout Enumerate
-Se a variação for grande em 
-\series bold
-ambas
-\series default
- as direções, então temos um bom candidato a canto.
+Se a variação for grande em várias direções, então temos um bom candidato
+ a canto.
+\end_layout
+
+\begin_layout Standard
+A figura 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Classificação-das-regiões"
+
+\end_inset
+
+ ilustra esta classificação de regiões.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/harris_region.jpg
+	lyxscale 80
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Classificação-das-regiões"
+
+\end_inset
+
+Classificação das regiões
+\begin_inset CommandInset citation
+LatexCommand cite
+key "harris_region"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 Portanto, a ideia do algoritmo de Harris é procurar por janelas onde há
  alta variação.
- Queremos, então, maximizar a função de energia XXX.
+ Queremos, então, maximizar a função de energia da equação (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:window_energy"
+
+\end_inset
+
+).
  
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $∑x,y[I(x+u,y+v)−I(x,y)]2$
+Usando uma aproximação por expansão de Taylor, temos:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace smallskip
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Using Taylor expansion:
-\end_layout
+\begin_inset Formula 
+\[
+E(u,v)≈∑w(x,y)[I(x,y)+uI_{x}+vI_{y}−I(x,y)]^{2}\text{≈∑}w(x,y)(u^{2}I_{x}^{2}+2uvI_{x}I_{y}+v^{2}I_{y}^{2})
+\]
 
-\begin_layout Standard
-\begin_inset Formula $E(u,v)≈∑x,y[I(x,y)+uIx+vIy−I(x,y)]2$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Expanding the equation and cancelling properly:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $E(u,v)≈∑x,yu2I2x+2uvIxIy+v2I2y$
+\begin_inset VSpace bigskip
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Which can be expressed in a matrix form as:
+Que pode ser expressa em forma matricial como:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $E(u,v)≈[uv](∑x,yw(x,y)[I2xIxIyIxIyI2y])[uv]$
+\begin_inset VSpace smallskip
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Let's denote:
-\end_layout
+\begin_inset Formula 
+\[
+E(u,v)≈[\begin{array}{cc}
+u & v\end{array}](\sum_{x,y}w(x,y)\left[\begin{array}{cc}
+I_{x}^{2} & I_{x}I_{y}\\
+I_{x}I_{y} & I_{y}^{2}
+\end{array}\right])\left[\begin{array}{c}
+u\\
+v
+\end{array}\right]
+\]
 
-\begin_layout Standard
-\begin_inset Formula $M=∑x,yw(x,y)[I2xIxIyIxIyI2y]$
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-So, our equation now is:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $E(u,v)≈[uv]M[uv]$
+\begin_inset VSpace bigskip
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Com esta formulação, podemos analisar em que caso um determinado pixel se
- encontra a partir de uma análise dos autovalores da matriz M.
+Seja:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+M=\text{∑}w(x,y)\left[\begin{array}{cc}
+I_{x}^{2} & I_{x}I_{y}\\
+I_{x}I_{y} & I_{y}^{2}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Substituindo, chegamos à expressão:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+E(u,v)\text{≈}[\begin{array}{cc}
+u & v\end{array}]M\left[\begin{array}{c}
+u\\
+v
+\end{array}\right]\label{eq:matrix_energy}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace bigskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Com esta formulação (equação 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:matrix_energy"
+
+\end_inset
+
+), podemos analisar em que caso um determinado pixel se encontra a partir
+ de uma análise dos autovalores da matriz 
+\begin_inset Formula $M$
+\end_inset
+
+.
  Se ambos os autovalores têm uma magnitude pequena, trata-se do caso 1 (região
  lisa).
  Caso um dos autovalores tenha uma magnitude significativamente superior
@@ -283,29 +553,180 @@ função de resposta do canto
 \begin_inset Quotes erd
 \end_inset
 
-, que permite uma análise direta destes casos a partir de funções simples
+ (equação 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:corner_response"
+
+\end_inset
+
+), que permite uma análise direta destes casos a partir de funções simples
  sobre a matriz M.
- Sejam λ1 e λ2 os autovalores de M e considerando que det(M) = λ1λ2 e trace(M)
- = λ1+λ2.
+ Sejam 
+\begin_inset Formula $\lambda_{1}$
+\end_inset
+
+ e 
+\begin_inset Formula $\lambda_{2}$
+\end_inset
+
+ os autovalores de M e considerando que 
+\begin_inset Formula $det(M)=\lambda_{1}\lambda_{2}$
+\end_inset
+
+ e 
+\begin_inset Formula $trace(M)=\lambda_{1}+\lambda_{2}$
+\end_inset
+
+ .
  A função de resposta do canto foi definida como:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula $R=det(M)−k(trace(M))^{2}$
+\begin_inset Formula 
+\begin{equation}
+R=det(M)−k(trace(M))^{2}\label{eq:corner_response}
+\end{equation}
+
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Em que k é uma constante determinada empiricamente como um valor entre 0.04
- e 0.06 para bons resultados.
+Em que 
+\begin_inset Formula $k$
+\end_inset
+
+ é uma constante determinada empiricamente como um valor entre 0.04 e 0.06
+ para bons resultados.
+\end_layout
+
+\begin_layout Standard
+Assim, estabelece-se um critério bastante objetivo para classificação das
+ arestas.
+ De acordo com a implementação do algoritmo de Harris, se o valor absoluto
+ de 
+\begin_inset Formula $R$
+\end_inset
+
+ for pequeno, tem-se uma região lisa, se R for negativo, tem-se uma aresta
+ e se for positivo temos um candidato a canto.
+ Assim, basta apenas estipular um limiar positivo acima do qual consideraremos
+ que o há um canto dentro da janela em questão.
 \end_layout
 
 \begin_layout Standard
 Por conta de sua simplicidade, algumas propriedades importantes não podem
  ser captadas pelos algoritmo de Harris, imprimindo-lhe algumas deficiências
  como sensibilidade à variação de escala e de perspectiva.
+\end_layout
+
+\begin_layout Section
+Implementação
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+O programa implementado permite que o usuário selecione uma imagem em seu
+ computador ou utilize a câmera principal do sistema para realizar um processame
+nto contínuo.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Interface do programa
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A imagem carregada é, então, exibida na janela principal do programa.
+ Caso seja escolhida a opção de captura contínua, a leitura da câmera fará
+ atualização constante dessa imagem.
+\end_layout
+
+\begin_layout Standard
+Ao selecionar a opção 
+\begin_inset Quotes eld
+\end_inset
+
+Apply Harris Detector
+\begin_inset Quotes erd
+\end_inset
+
+, realiza-se uma cópia da imagem exibida, convertendo-a para um espaço de
+ cor em escala de cinza.
+ A imagem monocromática é, então, submetida ao algoritmo de Harris para
+ detecção de cantos.
+ Os parâmetros do algoritmo (tamanho da janela, tamanho da máscara de derivada,
+ valor limiar para a função de resposta de canto e constante k empírica)
+ são expostos para manipulação do usuário, que pode verificar o efeito de
+ alterar cada um deles.
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "hallpaz_github"
+
+\end_inset
+
+Hallison's github: [internet] Disponíel em: <https://github.com/hallpaz/Image-Pro
+cessing-IMPA-2015>
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "harris_region"
+
+\end_inset
+
+Harris regions.
+ [internet] Acessado em 21 de outubro de 2015.
+ Disponível em: <http://opencv-python-tutroals.readthedocs.org/en/latest/py_tutori
+als/py_feature2d/py_features_harris/py_features_harris.html>
 \end_layout
 
 \end_body
