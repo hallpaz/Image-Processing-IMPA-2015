@@ -157,9 +157,9 @@ void MainWindow::on_actionCameraCapture_toggled(bool toggle)
                 cv::cvtColor(secondImage, secondImage, CV_BGR2RGB);
                 currentImage = secondImage;
             }
-            updateDisplay();
 
             m_cvCamera.release();
+            updateDisplay();
         }
         ui->actionLoadImage->setDisabled( false );
         ui->actionSaveImage->setDisabled( false );
@@ -281,7 +281,7 @@ void flowToRGB(const cv::Mat & flowImage, cv::Mat & rgbFlow)
         }
     }
 
-    cv::cvtColor(hsvImage, rgbFlow, CV_HSV2BGR);
+    cv::cvtColor(hsvImage, rgbFlow, CV_HSV2RGB);
 }
 
 void drawArrows(cv::Mat&flowImage, cv::Mat& dstImg, int magnitudeThreshold){

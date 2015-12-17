@@ -1,0 +1,820 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement H
+\paperfontsize default
+\spacing onehalf
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\topmargin 2.5cm
+\rightmargin 2.5cm
+\bottommargin 2.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation 2cm
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+\lang brazilian
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
+INSTITUTO NACIONAL DE MATEMÁTICA PURA E APLICADA
+\end_layout
+
+\begin_layout Standard
+
+\lang brazilian
+\begin_inset VSpace 4.5cm
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
+\lang brazilian
+HALLISON OLIVEIRA DA PAZ
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing single
+\align center
+
+\lang brazilian
+\begin_inset VSpace 4.5cm
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
+CURSO DE PROCESSAMENTO DE IMAGENS
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
+\emph on
+Assignment 4: Tracking
+\end_layout
+
+\begin_layout Standard
+
+\lang brazilian
+\begin_inset VSpace 4.5cm
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing single
+\align center
+
+\series bold
+\lang brazilian
+RIO DE JANEIRO
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing single
+\align center
+
+\series bold
+\lang brazilian
+2015
+\end_layout
+
+\begin_layout Standard
+
+\lang brazilian
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introdução
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Este relatório descreve a implementação do 
+\emph on
+assignment
+\emph default
+ 
+\emph on
+Tracking
+\emph default
+ do curso de Processamento de Imagens.
+ Foram utilizados a biblioteca OpenCV (3.0) para implementação das funções
+ de visão computacional, em particular para o cálculo do 
+\emph on
+Optical Flow
+\emph default
+ denso foi utilizado algoritmo de 
+\emph on
+Farneback
+\emph default
+, e o ambiente de desenvolvimento integrado QT Creator para a confecção
+ das interfaces gráficas.
+ O código fonte encontra-se no repositório 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hallpaz_github"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Explicação do Algoritmo
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+O Algoritmo de Farneback é um algoritmo para estimação de optical flow denso,
+ ou seja, o algoritmo tenta determinar uma estimativa de movimento para
+ todos os pixels da imagem.
+ Uma abordagem um pouco diferente seria o cálculo de optical flow esparso
+ seja por meio da detecção de features dentro das imagens e o acompanhamento
+ do movimento dessas features, seja por meio de uma suposição de continuidade
+ de movimento de regiões próximas, na qual realiza-se o cálculo do optical
+ flow por blocos dentro da imagem.
+\end_layout
+
+\begin_layout Standard
+De posse de uma sequência ordenada de imagens e sob algumas hipóteses podemos
+ realizar uma estimativa de movimentos dentro da cena.
+ Supondo que a primeira imagem seja capturada em um tempo 
+\series bold
+\emph on
+
+\begin_inset Formula $t$
+\end_inset
+
+
+\series default
+\emph default
+ e a segunda em 
+\begin_inset Formula $t+\triangle t$
+\end_inset
+
+, considerando que há uma 
+\begin_inset Quotes eld
+\end_inset
+
+constância de brilho
+\begin_inset Quotes erd
+\end_inset
+
+ entre as duas imagens podemos calcular uma estimativa de movimento aparente
+ baseada em uma aproximação local em série de Taylor do sinal imagem.
+\end_layout
+
+\begin_layout Standard
+Embora a ideia seja bem simples e funcione razoavelmente bem dentro de um
+ ambiente controlado, é importante notar que muitas variáveis podem causar
+ dificuldades nesta estimação, dentre elas:
+\end_layout
+
+\begin_layout Itemize
+Falha da hipótese de constância de brilho: é possível que haja uma mudança
+ significativa de iluminação entre um frame e outro, principalmente se a
+ cena envolver objetos e fontes de iluminação que favoreçam o surgimento
+ de brilho especular.
+\end_layout
+
+\begin_layout Itemize
+Movimentos de grande amplitude: é possível que alguns objetos estejam se
+ locomovendo em alta velocidade dentro da cena e, mesmo em um intervalo
+ pequeno de tempo, seu deslocamento gere uma grande variação entre um frame
+ e outro.
+\end_layout
+
+\begin_layout Itemize
+Oclusão: evidentemente, não é possível obter informações de movimento de
+ elementos que não estavam em uma das imagens por conta de oclusão ou por
+ estarem fora do campo de visão de uma delas.
+ É preciso levar isto em consideração para aumentar a robustez dos algoritmos.
+\end_layout
+
+\begin_layout Standard
+Por conta dessas dificuldades, vários algoritmos de estimação de movimento
+ baseados em cálculo de optical flow utilizam-se de alguns artifícios adicionais
+ para aumentar sua eficácia e robustez.
+ Por exemplo, o algoritmo de Farneback realiza uma expansão em níveis de
+ pirâmide multiresolução para 
+\end_layout
+
+\begin_layout Standard
+número de níveis de pirâmide.
+ A expansão em pirâmide mutiescala é utilizada para 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+tamanho da janela
+\emph default
+ de busca.
+\end_layout
+
+\begin_layout Standard
+número de iterações
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+grau do polinômio 
+\emph default
+utilizado na expansão.
+\end_layout
+
+\begin_layout Standard
+Estes parâmetros estão expostos na barra inferior da interface do programa.
+ O parâmetro que representa a razão entre as imagens no cálculo multiescala
+ não foi exposto, de modo que assume-se sempre a criação de uma pirâmide
+ clássica em que as dimensões da imagem são divididas por dois a cada nível
+ que se incrementa.
+\end_layout
+
+\begin_layout Section
+Implementação
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+indent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+O programa implementado permite que o usuário selecione duas imagem em seu
+ computador ou utilize a câmera principal do sistema para capturar o par
+ de imagens.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/interface_arrowed.png
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Interface do programa
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+O usuário deve selecionar se deseja carregar a imagem 1 ou 2 e, então, clicar
+ no ícone de 
+\begin_inset Quotes eld
+\end_inset
+
+pasta
+\begin_inset Quotes erd
+\end_inset
+
+ na barra superior da interface.
+ Dessa forma, será exibida uma janela para selação de arquivo, onde pode-se
+ escolher qual imagem será aberta e exibida na área principal do programa.
+ Após selecionar as duas imagens, o usuário pode clicar em uma das opções
+ Flow Colorful ou Flow Arrowed para exibir um mapa colorizado do optical
+ flow ou um mapa de vetores, respectivamente.
+ Os 
+\emph on
+radio buttons
+\emph default
+ da interface permitem que o usuário retorne a qualquer uma das imagens
+ já carregada a qualquer momento.
+ 
+\end_layout
+
+\begin_layout Standard
+Os mapas de optical flow apenas são recalculados se houver alguma mudança
+ de parâmetros.
+ Portanto, caso o usuário esteja visualizando o mapa de cor de optical flow
+ e deseje visualizar o mapa de vetores, é ncessário que ele altere algum
+ parâmetro na parte inferior da interface (mesmo que ele retorne o valor
+ para o original) para que o programa entenda que é necessário recalcular
+ a imagem.
+ Isto foi realizado desta forma, pois pode ser muito custoso recalcular
+ o optical flow denso de um par de imagens, então caso o usuário queira
+ visualizar as imagens originais e um dos mapas de optical flow intervaladamente
+, não haverá necessidade de recalculá-lo.
+\end_layout
+
+\begin_layout Standard
+A título de comparação, utilizou-se algumas imagens do 
+\emph on
+UCL Ground Truth Optical Flow Dataset v1.2 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ground-truth"
+
+\end_inset
+
+, 
+\emph default
+que constitui-se de imagens sintéticas que servem como 
+\begin_inset Quotes eld
+\end_inset
+
+ground truth
+\begin_inset Quotes erd
+\end_inset
+
+ para validação de algoritmos para cálculo de optical flow.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/3.png
+	lyxscale 49
+	scale 32
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Resultado neste trabalho
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/flow18.png
+	lyxscale 49
+	scale 32
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ground Truth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Comparação entre o resultado obtido no trabalho e o dataset sintético (018_Sponz
+a1)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+skjdbksjbkjskds
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/5.png
+	lyxscale 49
+	scale 32
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Resultado neste trabalho
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/flow51.png
+	lyxscale 49
+	scale 32
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ground Truth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Comparação entre o resultado obtido no trabalho e o dataset sintético (051_blow1
+Txtr1)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+sdsdfsdf
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/brickflow.png
+	lyxscale 49
+	scale 32
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Resultado neste trabalho
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/flow26.png
+	lyxscale 49
+	scale 32
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ground Truth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Comparação entre o resultado obtido no trabalho e o dataset sintético (026_Brick
+box1t1)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "hallpaz_github"
+
+\end_inset
+
+Hallison's github: [internet] Disponíel em: <https://github.com/hallpaz/Image-Pro
+cessing-IMPA-2015>
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "drawing_flow"
+
+\end_inset
+
+How to draw Optical flow images from ocl::PyrLKOpticalFlow::dense().
+ [internet] Acessado em 14 de dezembro de 2015.
+ Disponível em: <http://stackoverflow.com/questions/20064818/how-to-draw-optical-
+flow-images-from-oclpyrlkopticalflowdense>
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "ground-truth"
+
+\end_inset
+
+UCL Ground Truth Optical Flow Dataset v1.2.
+ [internet] Acessado em 13 de dezembro de 2015 http://visual.cs.ucl.ac.uk/pubs/flowC
+onfidence/supp/
+\end_layout
+
+\end_body
+\end_document
