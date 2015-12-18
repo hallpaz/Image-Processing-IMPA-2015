@@ -209,16 +209,24 @@ Tracking
 \emph default
  do curso de Processamento de Imagens.
  Foram utilizados a biblioteca OpenCV (3.0) para implementação das funções
- de visão computacional, em particular para o cálculo do 
+ de visão computacional e o ambiente de desenvolvimento integrado QT Creator
+ para a confecção das interfaces gráficas.
+ Em particular, para o cálculo do 
 \emph on
 Optical Flow
 \emph default
- denso foi utilizado algoritmo de 
+ denso foi utilizado o algoritmo de 
 \emph on
 Farneback
 \emph default
-, e o ambiente de desenvolvimento integrado QT Creator para a confecção
- das interfaces gráficas.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Farneback"
+
+\end_inset
+
+.
  O código fonte encontra-se no repositório 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -253,7 +261,7 @@ indent
 O Algoritmo de Farneback é um algoritmo para estimação de optical flow denso,
  ou seja, o algoritmo tenta determinar uma estimativa de movimento para
  todos os pixels da imagem.
- Uma abordagem um pouco diferente seria o cálculo de optical flow esparso
+ Uma abordagem um pouco diferente seria o cálculo de optical flow esparso,
  seja por meio da detecção de features dentro das imagens e o acompanhamento
  do movimento dessas features, seja por meio de uma suposição de continuidade
  de movimento de regiões próximas, na qual realiza-se o cálculo do optical
@@ -286,7 +294,7 @@ constância de brilho
 \end_inset
 
  entre as duas imagens podemos calcular uma estimativa de movimento aparente
- baseada em uma aproximação local em série de Taylor do sinal imagem.
+ baseada em uma aproximação local polinomial do sinal imagem.
 \end_layout
 
 \begin_layout Standard
@@ -321,32 +329,50 @@ Por conta dessas dificuldades, vários algoritmos de estimação de movimento
  baseados em cálculo de optical flow utilizam-se de alguns artifícios adicionais
  para aumentar sua eficácia e robustez.
  Por exemplo, o algoritmo de Farneback realiza uma expansão em níveis de
- pirâmide multiresolução para 
+ pirâmide multiresolução para tentar detectar movimentos de maior amplitude.
+ O número de níveis de pirâmide, incluindo a imagem original, é um dos parâmetro
+s do algoritmo.
+ O tamanho da janela de busca também é um dos parâmetros do algoritmo.
+ Quanto maior a janela de busca, maior a chance de detectar movimentos de
+ grande amplitude (e maior o esforço computacional também, pois a janela
+ é tomada para cada pixel).
 \end_layout
 
 \begin_layout Standard
-número de níveis de pirâmide.
- A expansão em pirâmide mutiescala é utilizada para 
+O algoritmo de Farneback adota uma modelagem inicial bastante simplificada,
+ em que cada imagem é aproximada por um mesmo polinômio quadrático que difere
+ apenas por um deslocamento.
+ Esse modelo, contudo, pode ser refinado por um conhecimento a priori do
+ tipo de movimento da cena, que pode ser dado como entrada para o algoritmo.
+ Dessa forma, é possível uma abordagem de malha fechada em um processo iterativo
+ que, ao calcular uma estimativa de optical flow num dado passo, insere
+ a última estimativa calculada como entrada para uma próxima iteração.
+ O número de iterações executadas é outro parâmetro do algoritmo.
 \end_layout
 
 \begin_layout Standard
 
 \emph on
-tamanho da janela
+O 
 \emph default
- de busca.
-\end_layout
-
-\begin_layout Standard
-número de iterações
-\end_layout
-
-\begin_layout Standard
-
+tamanho da janela de pixels utilizada para calcular uma expansão polinomial
+ local do sinal imagem
 \emph on
-grau do polinômio 
+ 
 \emph default
-utilizado na expansão.
+também é um dos parâmetros do algoritmo
+\emph on
+ (poly_n).
+ 
+\emph default
+Maiores valores de poly_n resultam em uma aproximação da imagem por superfícies
+ mais suaves, gerando mais robustez ao custo de maior borramento no campo
+ de movimento.
+ Durante o cálculo da expansão polinomial, as derivadas são suavizadas por
+ uma função gaussiana cujo desvio padrão é especificado pelo parâmetro poly_sigm
+a.
+ Em geral, para poly_n=5, poly_sigma em torno de 1,1 é satisfatório; para
+ poly_n=7, ajusta-se poly_sigma para 1.5.
 \end_layout
 
 \begin_layout Standard
@@ -432,9 +458,17 @@ pasta
 \end_inset
 
  na barra superior da interface.
- Dessa forma, será exibida uma janela para selação de arquivo, onde pode-se
+ Dessa forma, será exibida uma janela para seleção de arquivo, onde pode-se
  escolher qual imagem será aberta e exibida na área principal do programa.
- Após selecionar as duas imagens, o usuário pode clicar em uma das opções
+ Para capturar uma imagem a partir da câmera, deve-se clicar no ícone da
+ câmera para ativá-la e, quando encontrar a posição desejada da câmera,
+ deve-se clicar novamente no ícone para desativá-la.
+ O último frame capturado pela câmera no momento da desativação será a imagem
+ utilizada.
+\end_layout
+
+\begin_layout Standard
+Após selecionar as duas imagens, o usuário pode clicar em uma das opções
  Flow Colorful ou Flow Arrowed para exibir um mapa colorizado do optical
  flow ou um mapa de vetores, respectivamente.
  Os 
@@ -450,12 +484,12 @@ radio buttons
 Os mapas de optical flow apenas são recalculados se houver alguma mudança
  de parâmetros.
  Portanto, caso o usuário esteja visualizando o mapa de cor de optical flow
- e deseje visualizar o mapa de vetores, é ncessário que ele altere algum
+ e deseje visualizar o mapa de vetores, é necessário que ele altere algum
  parâmetro na parte inferior da interface (mesmo que ele retorne o valor
  para o original) para que o programa entenda que é necessário recalcular
  a imagem.
  Isto foi realizado desta forma, pois pode ser muito custoso recalcular
- o optical flow denso de um par de imagens, então caso o usuário queira
+ o optical flow denso de um par de imagens; então, caso o usuário queira
  visualizar as imagens originais e um dos mapas de optical flow intervaladamente
 , não haverá necessidade de recalculá-lo.
 \end_layout
@@ -481,6 +515,28 @@ ground truth
 \end_inset
 
  para validação de algoritmos para cálculo de optical flow.
+ As figuras 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:sponza"
+
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:blow"
+
+\end_inset
+
+ e 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:brick"
+
+\end_inset
+
+ mostram o resultado para algumas comparações.
 \end_layout
 
 \begin_layout Standard
@@ -568,6 +624,12 @@ Ground Truth
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:sponza"
+
+\end_inset
+
 Comparação entre o resultado obtido no trabalho e o dataset sintético (018_Sponz
 a1)
 \end_layout
@@ -580,10 +642,6 @@ a1)
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-skjdbksjbkjskds
 \end_layout
 
 \begin_layout Standard
@@ -667,6 +725,12 @@ Ground Truth
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:blow"
+
+\end_inset
+
 Comparação entre o resultado obtido no trabalho e o dataset sintético (051_blow1
 Txtr1)
 \end_layout
@@ -679,10 +743,6 @@ Txtr1)
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-sdsdfsdf
 \end_layout
 
 \begin_layout Standard
@@ -731,7 +791,7 @@ Resultado neste trabalho
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -766,6 +826,12 @@ Ground Truth
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:brick"
+
+\end_inset
+
 Comparação entre o resultado obtido no trabalho e o dataset sintético (026_Brick
 box1t1)
 \end_layout
@@ -814,6 +880,19 @@ key "ground-truth"
 UCL Ground Truth Optical Flow Dataset v1.2.
  [internet] Acessado em 13 de dezembro de 2015 http://visual.cs.ucl.ac.uk/pubs/flowC
 onfidence/supp/
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "Farneback"
+
+\end_inset
+
+Gunnar Farnebäck.
+ Two-frame motion estimation based on polynomial expansion.
+ In Image Analysis, pages 363–370.
+ Springer, 2003.
 \end_layout
 
 \end_body

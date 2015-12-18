@@ -261,7 +261,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionCameraCapture"/>
-   <addaction name="actionProcessing"/>
    <addaction name="actionLoadImage"/>
    <addaction name="actionSaveImage"/>
   </widget>
@@ -279,24 +278,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionProcessing">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/process.png</normaloff>:/icons/process.png</iconset>
-   </property>
-   <property name="text">
-    <string>Processing</string>
-   </property>
-   <property name="toolTip">
-    <string>Apply a filter on image</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionSaveImage">
